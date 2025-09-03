@@ -2,6 +2,8 @@
 
 A small FastAPI application that calculates the total return of a stock portfolio, including dividends, using CSV exports from Fidelity.
 
+Still has some parsing problems and doesn't account for data that has not been logged due to recency, etc. but is very close.
+
 ## Features
 
 - Upload activity and positions CSV files.
@@ -40,14 +42,6 @@ python bootstrap.py
 - `GET /portfolio` – return the combined portfolio summary with current prices and total return metrics.
 
 Uploaded files are stored under `data/uploads` and `data/positions`.
-
-## Development
-
-Dependencies are listed in `requirements.txt`. After modifying the code, run the test suite (none are present yet, but this will initialize pytest):
-
-```bash
-pytest
-```
 
 
 ## Node.js rewrite
