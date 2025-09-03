@@ -1,7 +1,12 @@
 
-const BUY_PAT = /YOU\s+BOUGHT/i;
-const SELL_PAT = /YOU\s+SOLD/i;
-const REINVEST_PAT = /REINVESTMENT/i;
+// Match generic BUY/SELL verbs so that activity rows that omit the leading
+// "YOU" still count. Fidelity's CSV exports can contain plain verbs like
+// "BOUGHT" or "SOLD" which previously slipped through. We also treat any
+// kind of reinvest instruction as a buy so dividend reinvestments are added
+// to invested totals.
+const BUY_PAT = /(BUY|BOUGHT)/i;
+const SELL_PAT = /(SELL|SOLD)/i;
+const REINVEST_PAT = /REINVEST/i;
 const DIV_PAT = /DIVIDEND\s+RECEIVED/i;
 
 const CASH_TICKERS = new Set([
@@ -9,9 +14,13 @@ const CASH_TICKERS = new Set([
   'PENDING', 'PENDING ACTIVITY', 'CASH'
 ]);
 
+function stripQuotes(x) {
+  return typeof x === 'string' ? x.replace(/^"+|"+$/g, '') : x;
+}
+
 function isCashLike(symbolRaw, desc) {
-  const s = (symbolRaw || '').trim().toUpperCase();
-  const d = (desc || '').trim().toUpperCase();
+  const s = stripQuotes(symbolRaw || '').trim().toUpperCase();
+  const d = stripQuotes(desc || '').trim().toUpperCase();
   if (!s && !d) return true;
   if (s.startsWith('SPAXX')) return true;
   if (CASH_TICKERS.has(s)) return true;
@@ -21,7 +30,7 @@ function isCashLike(symbolRaw, desc) {
 
 function normSymbol(x) {
   if (x === undefined || x === null) return null;
-  let s = String(x).trim().toUpperCase();
+  let s = stripQuotes(String(x)).trim().toUpperCase();
   if (!s || CASH_TICKERS.has(s)) return null;
   if (s.startsWith('$')) s = s.slice(1);
   return s;
@@ -33,8 +42,8 @@ const SYMBOL_IN_PARENS = /\(([A-Z][A-Z0-9\.]{0,9})\)/;
 function extractSymbol(symRaw, desc, action) {
   const norm = normSymbol(symRaw);
   if (norm) return norm;
-  const d = (desc || '').trim().toUpperCase();
-  const a = (action || '').toUpperCase();
+  const d = stripQuotes(desc || '').trim().toUpperCase();
+  const a = stripQuotes(action || '').toUpperCase();
   const paren = a.match(SYMBOL_IN_PARENS) || d.match(SYMBOL_IN_PARENS);
   if (paren) return normSymbol(paren[1]);
   const m = d.match(SYMBOL_FROM_DESC);
@@ -44,7 +53,7 @@ function extractSymbol(symRaw, desc, action) {
 
 function toNumber(val) {
   if (val === undefined || val === null) return 0;
-  let s = String(val).trim();
+  let s = stripQuotes(String(val)).trim();
   s = s.replace(/[\$,]/g, '').replace(/%/g, '');
   const m = s.match(/^\((.*)\)$/);
   if (m) s = '-' + m[1];
@@ -69,9 +78,9 @@ function aggregateActivity(rows) {
   rows = dedupe(rows);
   const out = {};
   for (const row of rows) {
-    const action = String(row['Action'] || '');
-    const symRaw = String(row['Symbol'] || '');
-    const desc = String(row['Description'] || '');
+    const action = stripQuotes(String(row['Action'] || ''));
+    const symRaw = stripQuotes(String(row['Symbol'] || ''));
+    const desc = stripQuotes(String(row['Description'] || ''));
     const sym = extractSymbol(symRaw, desc, action);
     if (!sym || isCashLike(symRaw, desc)) continue;
     const qty = toNumber(row['Quantity']);
@@ -99,8 +108,8 @@ function parsePositions(rows) {
   rows = dedupe(rows);
   const out = {};
   for (const row of rows) {
-    const symRaw = String(row['Symbol'] || '');
-    const desc = String(row['Description'] || '');
+    const symRaw = stripQuotes(String(row['Symbol'] || ''));
+    const desc = stripQuotes(String(row['Description'] || ''));
     const sym = extractSymbol(symRaw, desc);
     if (!sym || isCashLike(symRaw, desc)) continue;
     const qty = toNumber(row['Quantity']);
