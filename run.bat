@@ -1,7 +1,6 @@
 @echo off
-REM Launch the Node.js backend instead of the Python one
+REM Simple Windows runner... creates venv then launches app
 setlocal
 set ROOT=%~dp0
-cd /d "%ROOT%\node-app"
-call npm install
-call npm start
+cd /d "%ROOT%"
+py -3 bootstrap.py
