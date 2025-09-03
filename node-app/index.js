@@ -19,6 +19,14 @@ const app = express();
 const upload = multer({ dest: UPLOADS_DIR });
 const uploadPositions = multer({ dest: POSITIONS_DIR });
 
+function clearCsvs(folder) {
+  for (const f of fs.readdirSync(folder)) {
+    if (f.endsWith('.csv')) {
+      fs.unlinkSync(path.join(folder, f));
+    }
+  }
+}
+
 app.use('/app', express.static(path.join(ROOT, 'frontend')));
 
 app.get('/', (req, res) => {
@@ -35,6 +43,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
     if (req.file) fs.unlinkSync(req.file.path);
     return res.status(400).json({ detail: 'Upload a .csv file' });
   }
+  clearCsvs(UPLOADS_DIR);
   const dest = path.join(UPLOADS_DIR, req.file.originalname);
   fs.renameSync(req.file.path, dest);
   res.json({ ok: true, filename: req.file.originalname, kind: 'activity' });
@@ -45,6 +54,7 @@ app.post('/upload_positions', uploadPositions.single('file'), (req, res) => {
     if (req.file) fs.unlinkSync(req.file.path);
     return res.status(400).json({ detail: 'Upload a .csv file' });
   }
+  clearCsvs(POSITIONS_DIR);
   const dest = path.join(POSITIONS_DIR, req.file.originalname);
   fs.renameSync(req.file.path, dest);
   res.json({ ok: true, filename: req.file.originalname, kind: 'positions' });
@@ -118,6 +128,8 @@ async function servePortfolio(req, res) {
     total_return_percent: total_invested > 0 ? (total_mv + total_divs - total_invested) / total_invested * 100 : null
   };
   const missing_prices = symbols.filter(s => prices[s] == null);
+  clearCsvs(UPLOADS_DIR);
+  clearCsvs(POSITIONS_DIR);
   res.json({ rows: summary, overall, missing_prices });
 }
 
