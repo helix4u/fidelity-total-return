@@ -59,3 +59,7 @@ cd node-app
 npm install
 npm start
 ```
+
+## Support
+
+If this project helps you, consider [supporting it on Ko-fi](https://ko-fi.com/gille).
