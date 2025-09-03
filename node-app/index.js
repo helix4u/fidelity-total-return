@@ -72,21 +72,15 @@ function readManyCsv(folder) {
   for (const f of files) {
     const txt = fs.readFileSync(path.join(folder, f), 'utf8');
     const lines = txt.split(/\r?\n/);
-    const hdrIdx = lines.findIndex(line => line.split(',').length > 5);
+    const hdrIdx = lines.findIndex(line => /Account Number/i.test(line) && /Description/i.test(line));
     if (hdrIdx === -1) continue;
-    const header = lines[hdrIdx];
-    const colCount = header.split(',').length;
-    const dataLines = [header];
-    for (let i = hdrIdx + 1; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.split(',').length !== colCount) {
-        // skip blank lines or disclaimers with mismatched columns
-        continue;
-      }
-      dataLines.push(line);
-    }
-    const data = dataLines.join('\n');
-    const parsed = parse(data, { columns: true, skip_empty_lines: true, bom: true });
+    const data = lines.slice(hdrIdx).join('\n');
+    const parsed = parse(data, {
+      columns: true,
+      skip_empty_lines: true,
+      bom: true,
+      relax_column_count: true
+    });
     rows = rows.concat(parsed);
   }
   return rows;

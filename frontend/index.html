@@ -122,6 +122,7 @@
       </div>
       <div class="toolbar">
         <button id="recalc" class="primary">Recalculate</button>
+        <button id="clear">Clear</button>
         <div class="spacer"></div>
         <span class="small pill muted" id="missing"></span>
       </div>
@@ -219,6 +220,27 @@
 
     $("#recalc").addEventListener("click", async () => {
       await refresh();
+    });
+
+    $("#clear").addEventListener("click", async () => {
+      const btn = $("#clear");
+      btn.disabled = true;
+      try {
+        const r = await fetch("/clear", { method: "POST" });
+        if (!r.ok) throw new Error(await r.text());
+        $("#statusA").textContent = "";
+        $("#statusP").textContent = "";
+        $("#activityFile").value = "";
+        $("#positionsFile").value = "";
+        paintSummary({invested:0,dividends:0,market_value:0,total_return_dollars:0,total_return_percent:null});
+        rowsEl.innerHTML = "";
+        emptyEl.classList.remove("hidden");
+        missingEl.textContent = "";
+      } catch(err) {
+        missingEl.textContent = "Error: " + err.message;
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     function paintSummary(overall){
