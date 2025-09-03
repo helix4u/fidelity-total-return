@@ -15,6 +15,15 @@ POSITIONS_DIR = DATA_DIR / "positions"  # positions CSVs
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 POSITIONS_DIR.mkdir(parents=True, exist_ok=True)
 
+
+def _clear_csvs(folder: Path) -> None:
+    """Remove all CSV files in the given folder."""
+    for p in folder.glob("*.csv"):
+        try:
+            p.unlink()
+        except FileNotFoundError:
+            pass
+
 app = FastAPI(title="Total Return", version="1.1")
 
 app.add_middleware(
@@ -38,6 +47,7 @@ def home():
 async def upload_csv(file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Upload a .csv file")
+    _clear_csvs(UPLOADS_DIR)
     dest = UPLOADS_DIR / file.filename
     with dest.open("wb") as out:
         shutil.copyfileobj(file.file, out)
@@ -47,6 +57,7 @@ async def upload_csv(file: UploadFile = File(...)):
 async def upload_positions_csv(file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Upload a .csv file")
+    _clear_csvs(POSITIONS_DIR)
     dest = POSITIONS_DIR / file.filename
     with dest.open("wb") as out:
         shutil.copyfileobj(file.file, out)
@@ -68,8 +79,8 @@ def _read_many_csvs(folder: Path) -> pd.DataFrame | None:
 def portfolio():
     act_df = _read_many_csvs(UPLOADS_DIR)       # activity
     pos_df = _read_many_csvs(POSITIONS_DIR)     # positions
-    if act_df is None and pos_df is None:
-        raise HTTPException(status_code=400, detail="Upload an activity CSV and/or a positions CSV first")
+    if act_df is None or pos_df is None:
+        raise HTTPException(status_code=400, detail="Upload both an activity CSV and a positions CSV first")
 
     summary = compute_portfolio_summary(act_df, pos_df)
 
@@ -106,4 +117,7 @@ def portfolio():
         "total_return_dollars": total_mv + total_divs - total_invested,
         "total_return_percent": ((total_mv + total_divs - total_invested) / total_invested * 100.0) if total_invested > 0 else None,
     }
+    # remove uploaded files to require fresh uploads next time
+    _clear_csvs(UPLOADS_DIR)
+    _clear_csvs(POSITIONS_DIR)
     return {"rows": summary, "overall": overall, "missing_prices": [s for s, p in prices.items() if p is None]}
