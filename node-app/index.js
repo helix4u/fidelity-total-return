@@ -19,9 +19,8 @@ const app = express();
 const upload = multer({ dest: UPLOADS_DIR });
 const uploadPositions = multer({ dest: POSITIONS_DIR });
 
-function clearCsvs(folder, except) {
+function clearCsvs(folder) {
   for (const f of fs.readdirSync(folder)) {
-    if (f === except) continue;
     if (f.endsWith('.csv')) {
       fs.unlinkSync(path.join(folder, f));
     }
@@ -59,6 +58,12 @@ app.post('/upload_positions', uploadPositions.single('file'), (req, res) => {
   const dest = path.join(POSITIONS_DIR, req.file.originalname);
   fs.renameSync(req.file.path, dest);
   res.json({ ok: true, filename: req.file.originalname, kind: 'positions' });
+});
+
+app.post('/clear', (req, res) => {
+  clearCsvs(UPLOADS_DIR);
+  clearCsvs(POSITIONS_DIR);
+  res.json({ ok: true });
 });
 
 function readManyCsv(folder) {

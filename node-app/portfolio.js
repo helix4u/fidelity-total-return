@@ -28,11 +28,15 @@ function normSymbol(x) {
 }
 
 const SYMBOL_FROM_DESC = /^([A-Z][A-Z0-9\.]{0,9})/;
+const SYMBOL_IN_PARENS = /\(([A-Z][A-Z0-9\.]{0,9})\)/;
 
-function extractSymbol(symRaw, desc) {
+function extractSymbol(symRaw, desc, action) {
   const norm = normSymbol(symRaw);
   if (norm) return norm;
   const d = (desc || '').trim().toUpperCase();
+  const a = (action || '').toUpperCase();
+  const paren = a.match(SYMBOL_IN_PARENS) || d.match(SYMBOL_IN_PARENS);
+  if (paren) return normSymbol(paren[1]);
   const m = d.match(SYMBOL_FROM_DESC);
   if (m) return normSymbol(m[1]);
   return null;
@@ -68,7 +72,7 @@ function aggregateActivity(rows) {
     const action = String(row['Action'] || '');
     const symRaw = String(row['Symbol'] || '');
     const desc = String(row['Description'] || '');
-    const sym = extractSymbol(symRaw, desc);
+    const sym = extractSymbol(symRaw, desc, action);
     if (!sym || isCashLike(symRaw, desc)) continue;
     const qty = toNumber(row['Quantity']);
     const amount = toNumber(row['Amount ($)'] ?? row['Amount'] ?? row['Net Amount'] ?? row['Net Amount ($)']);
