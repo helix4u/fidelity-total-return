@@ -1,52 +1,96 @@
 # Fidelity Total Return
 
-A small FastAPI application that calculates the total return of a stock portfolio, including dividends, using CSV exports from Fidelity.
+Calculate portfolio total return, including dividends, from Fidelity CSV exports. Two backends are provided (Node.js and Python/FastAPI) that serve a shared minimal frontend.
 
-Still has some parsing problems and doesn't account for data that has not been logged due to recency, etc. but is very close.
+## What’s Included
+
+- Node.js backend (Express) under `node-app/` (forgiving CSV parsing, recommended for most users)
+- Python backend (FastAPI) under `app/` (simple, minimal deps)
+- Shared frontend at `frontend/index.html`
 
 ## Features
 
-- Upload activity and positions CSV files.
-- Aggregate transactions and positions into a portfolio summary.
-- Fetch current prices with Yahoo Finance and compute market value and total return.
-- Serve a minimal web interface for uploading files and viewing results.
+- Upload activity and positions CSV files (Fidelity exports)
+- Aggregate transactions and positions into a per-symbol summary
+- Price lookup via Yahoo Finance with ~15 min in‑memory cache
+- Metrics: Market Value, Market Gain $/%, Dividends %, Total Return $/%
+- Sortable table with sticky header and an in‑app legend of formulas
 
-## Quick start
+## Quick Start
 
-- Grab exports of your positions and activity and orders history from Fidelity.
-- Clone the repo and install and launch the server of your choice.
-- Node.js version available because a friend uses SVP player... and they stick a portable python in the system path. This means he's allergic to python. It's super annoying.
+Node.js (recommended)
 
-## Node.js rewrite
+- Windows: run `run.bat`
+- macOS/Linux: run `run.sh`
+- Or manual:
+  - `cd node-app && npm install && npm start`
 
-A Node.js version of the server lives under `node-app`. Install dependencies and start it with:
+Python (FastAPI)
 
-```bash
-cd node-app
-npm install
-npm start
-```
+- Windows helper: `run_python.bat`
+- Manual:
+  - Create venv and `pip install -r requirements.txt`
+  - Launch: `uvicorn app.main:app --reload --port 8000`
 
-...or...
+Open the app at http://127.0.0.1:8000/.
 
-## Python
+## CSV Guidance
 
-On Windows use:
+- Export both “Activity & Orders” and “Positions” from Fidelity.
+- Node path trims preamble lines and is forgiving of variations.
+- Python path expects the header row to be at the top of the CSV.
 
-```
-run_python.bat
-```
+## Calculation Rules
 
-The server listens on http://127.0.0.1:8000/.
+- Positions are doctrine: only symbols present in the positions file are reported.
+- Shares come from positions; cost basis from positions. If cost basis is missing/0, fall back to activity net invested.
+- Activity parsing is robust to negative signs in Quantity/Amount (uses absolute values for buy/sell math).
+- Dividends are the positive amounts for “DIVIDEND RECEIVED …” in activity.
+
+Formulas
+
+- Market Value = current_price × shares
+- Market Gain $ = market_value − invested (excludes dividends)
+- Market Gain % = Market Gain $ ÷ invested × 100 (if invested > 0)
+- Dividends % = dividends ÷ invested × 100 (if invested > 0)
+- Total Return $ = market_value + dividends − invested
+- Total Return % = Total Return $ ÷ invested × 100 (if invested > 0)
 
 ## API
 
-- `POST /upload` – upload one or more activity CSV files.
-- `POST /upload_positions` – upload positions CSV files.
-- `GET /portfolio` – return the combined portfolio summary with current prices and total return metrics.
+Common endpoints (both backends)
 
-Uploaded files are stored under `data/uploads` and `data/positions`.
+- `POST /upload` – upload one or more activity CSV files (multipart `file`)
+- `POST /upload_positions` – upload positions CSV files (multipart `file`)
+- `GET /portfolio` – compute and return the enriched portfolio summary
+
+Node‑only convenience
+
+- `POST /clear` – remove uploaded CSVs without computing
+- `GET /recalc` – alias of `/portfolio`
+
+Python notes
+
+- Uploaded CSVs are deleted automatically after `/portfolio` returns.
+
+## Data Handling & Privacy
+
+- Upload directories: `data/uploads` (activity) and `data/positions` (positions)
+- Files are ephemeral and `.gitignore` excludes `data/` and `*.csv`
+- No auth; intended for local use only
+
+## Known Limitations
+
+- Broker CSV variability; Node is more tolerant than Python
+- Tickers without reliable quotes may show n/a; they’re excluded from price‑dependent metrics
+- No persistence beyond the current run; price cache is in‑memory (~15 min)
+
+## Troubleshooting
+
+- “Upload both an activity CSV and a positions CSV first”: ensure both uploads succeeded before Recalculate
+- Python + Clear button: `/clear` exists only on Node; in Python it’s harmless to click but will show an error toast
+- Price rate limits: try again later; caching reduces repeated calls
 
 ## Support
 
-If this project helps you, consider [supporting it on Ko-fi](https://ko-fi.com/gille).
+If this project helps you, consider [supporting it on Ko‑fi](https://ko-fi.com/gille).
