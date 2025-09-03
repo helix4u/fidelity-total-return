@@ -149,6 +149,7 @@
             <th class="right sortable" data-key="shares">Shares <span class="th-ind" id="ind-shares"></span></th>
             <th class="right sortable" data-key="net_invested_cash">Invested <span class="th-ind" id="ind-net_invested_cash"></span></th>
             <th class="right sortable" data-key="dividends_received">Dividends <span class="th-ind" id="ind-dividends_received"></span></th>
+            <th class="right sortable" data-key="dividend_return_percent">Dividends % <span class="th-ind" id="ind-dividend_return_percent"></span></th>
             <th class="right sortable" data-key="current_price">Price <span class="th-ind" id="ind-current_price"></span></th>
             <th class="right sortable" data-key="market_value">Market Value <span class="th-ind" id="ind-market_value"></span></th>
             <th class="right sortable" data-key="market_gain_dollars">Market Gain $ <span class="th-ind" id="ind-market_gain_dollars"></span></th>
@@ -175,7 +176,7 @@
     let sortKey = 'symbol';
     let sortDir = 'asc'; // 'asc' | 'desc'
     let lastRows = [];
-    const numericKeys = new Set(['shares','net_invested_cash','dividends_received','current_price','market_value','market_gain_dollars','market_gain_percent','total_return_dollars','total_return_percent']);
+    const numericKeys = new Set(['shares','net_invested_cash','dividends_received','dividend_return_percent','current_price','market_value','market_gain_dollars','market_gain_percent','total_return_dollars','total_return_percent']);
 
     function updateSortIndicators(){
       document.querySelectorAll('thead th .th-ind').forEach(el => el.textContent = '');
@@ -324,6 +325,16 @@
         tdDiv.textContent = fmtCurrency(r.dividends_received);
         tr.appendChild(tdDiv);
 
+        const tdDivPct = document.createElement("td");
+        tdDivPct.className = "right mono";
+        if (r.dividend_return_percent==null){
+          tdDivPct.innerHTML = '<span class="warn">n/a</span>';
+        }else{
+          const cls = r.dividend_return_percent >= 0 ? "pos" : "neg";
+          tdDivPct.innerHTML = '<span class="'+cls+'">'+fmtPct(r.dividend_return_percent)+'</span>';
+        }
+        tr.appendChild(tdDivPct);
+
         const tdPrice = document.createElement("td");
         tdPrice.className = "right mono";
         tdPrice.innerHTML = r.current_price==null ? '<span class="warn">n/a</span>' : fmtPrice(r.current_price);
@@ -435,6 +446,7 @@
         <div><strong>Shares</strong>: From positions file (authoritative).</div>
         <div><strong>Invested</strong>: Cost basis from positions; if missing/0, falls back to net invested from activity (cash out on buys minus proceeds from sells).</div>
         <div><strong>Dividends</strong>: Sum of positive amounts for “DIVIDEND RECEIVED …” in activity.</div>
+        <div><strong>Dividends %</strong>: dividends ÷ invested × 100 (if invested &gt; 0).</div>
         <div><strong>Price</strong>: Latest close from Yahoo Finance.</div>
         <div><strong>Market Value</strong>: current price × shares.</div>
         <div><strong>Market Gain $</strong>: market value − invested (excludes dividends).</div>

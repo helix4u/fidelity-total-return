@@ -47,6 +47,7 @@ Data uploads are transient. CSVs are deleted after calculation (or via an explic
    - `market_value = current_price * shares`
    - `market_gain_dollars = market_value - net_invested_cash`
    - `market_gain_percent = market_gain_dollars / net_invested_cash * 100` (if invested > 0)
+   - `dividend_return_percent = dividends_received / net_invested_cash * 100` (if invested > 0)
    - `total_return_dollars = market_value + dividends_received - net_invested_cash`
    - `total_return_percent = total_return_dollars / net_invested_cash * 100` (if invested > 0)
 4) Server responds with `rows[]`, `overall`, and `missing_prices[]`. Uploaded CSVs are then cleared.
@@ -93,6 +94,7 @@ Row schema (server response)
   market_value: number | null,
   market_gain_dollars: number | null,
   market_gain_percent: number | null,
+  dividend_return_percent: number | null,
   total_return_dollars: number | null,
   total_return_percent: number | null
 }
@@ -105,6 +107,7 @@ Overall schema (server response)
   market_value: number,
   market_gain_dollars: number,
   market_gain_percent: number | null,
+  dividend_return_percent: number | null,
   total_return_dollars: number,
   total_return_percent: number | null
 }
