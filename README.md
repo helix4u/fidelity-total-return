@@ -11,13 +11,7 @@ A small FastAPI application that calculates the total return of a stock portfoli
 
 ## Quick start
 
-The project ships with a bootstrap script that creates a virtual environment, installs dependencies and launches the API server:
-
-```bash
-python bootstrap.py
-```
-
-On Unix systems you can also run:
+Launch the Node.js backend and web UI with:
 
 ```bash
 ./run.sh
@@ -30,6 +24,14 @@ run.bat
 ```
 
 The server listens on http://127.0.0.1:8000/.
+
+### Python version
+
+The original FastAPI backend is still available if needed:
+
+```bash
+python bootstrap.py
+```
 
 ## API
 
@@ -47,3 +49,13 @@ Dependencies are listed in `requirements.txt`. After modifying the code, run the
 pytest
 ```
 
+
+## Node.js rewrite
+
+A Node.js version of the server lives under `node-app`. Install dependencies and start it with:
+
+```bash
+cd node-app
+npm install
+npm start
+```
