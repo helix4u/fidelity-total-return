@@ -10,11 +10,10 @@ import pandas as pd
 # Match generic BUY/SELL verbs so that activity rows lacking the leading
 # "YOU" prefix are still captured. Fidelity exports sometimes abbreviate
 # the action as simply "BOUGHT"/"SOLD", which previously went unnoticed.
-BUY_PAT      = re.compile(r"\b(BUY|BOUGHT)\b", re.I)
-SELL_PAT     = re.compile(r"\b(SELL|SOLD)\b", re.I)
-REINVEST_PAT = re.compile(r"\bREINVEST(?:MENT)?\b", re.I)
-DIV_PAT      = re.compile(r"\bDIVIDEND\b", re.I)   # catch plain "DIVIDEND"
-FEE_PAT      = re.compile(r"\b(FEE|COMMISSION|SERVICE FEE)\b", re.I)
+BUY_PAT = re.compile(r"BOUGHT", re.I)
+SELL_PAT = re.compile(r"SOLD", re.I)
+REINVEST_PAT = re.compile(r"REINVESTMENT", re.I)
+DIV_PAT = re.compile(r"DIVIDEND\s+RECEIVED", re.I)
 
 CASH_TICKERS = {
     "SPAXX", "FDRXX", "VMFXX", "SWVXX", "SPRXX", "SNVXX", "FCASH",
@@ -64,41 +63,20 @@ def _to_number(series: Optional[pd.Series], length: int) -> pd.Series:
 def _dedupe(df: Optional[pd.DataFrame]) -> pd.DataFrame:
     if df is None or df.empty:
         return pd.DataFrame()
-    df = df.copy()
-    # normalize numerics for robust dedup across overlapping exports
-    for col in ["Quantity","Cost Basis Total","Cost Basis","Amount ($)","Amount","Net Amount","Net Amount ($)"]:
-        if col in df.columns:
-            df[col] = (
-                df[col]
-                .astype(str)
-                .str.replace(r"[\$,,%]", "", regex=True)
-                .str.replace(r"^\((.*)\)$", r"-\1", regex=True)
-            )
-    # composite key
-    key_cols = [c for c in ["Run Date","Date","Account Number","Account Name","Symbol","Description","Action","Quantity","Amount ($)","Amount","Net Amount","Net Amount ($)"] if c in df.columns]
-    if key_cols:
-        df["__dedup_key"] = df[key_cols].astype(str).agg("|".join, axis=1)
-        df = df.drop_duplicates(subset="__dedup_key")
-        df = df.drop(columns="__dedup_key")
-    else:
-        df = df.drop_duplicates()
+    df = df.drop_duplicates()
+    keys = [c for c in ["Account Number","Account Name","Symbol","Description","Quantity","Cost Basis Total","Amount ($)","Run Date","Action"] if c in df.columns]
+    if keys:
+        df = df.drop_duplicates(subset=keys)
     return df
 
 def _is_buy(action: str) -> bool:
-    # external buys only… reinvest is not external cash
-    return bool(action and BUY_PAT.search(action))
+    return bool(action and (BUY_PAT.search(action) or REINVEST_PAT.search(action)))
 
 def _is_sell(action: str) -> bool:
     return bool(action and SELL_PAT.search(action))
 
 def _is_div(action: str) -> bool:
     return bool(action and DIV_PAT.search(action))
-
-def _is_reinvest(action: str) -> bool:
-    return bool(action and REINVEST_PAT.search(action))
-
-def _is_fee(action: str) -> bool:
-    return bool(action and FEE_PAT.search(action))
 
 # ---------- activity ----------
 def aggregate_activity(df: Optional[pd.DataFrame]) -> Dict[str, Dict[str, float]]:
@@ -122,36 +100,29 @@ def aggregate_activity(df: Optional[pd.DataFrame]) -> Dict[str, Dict[str, float]
     keep = sym.notna() & pd.Series([not _is_cash_like(sym_raw.iat[i], desc.iat[i]) for i in range(n)])
 
     a = pd.DataFrame({"action": action, "symbol": sym, "qty": qty, "amount": amount})[keep].copy()
-    a["is_buy"]      = a["action"].apply(_is_buy)
-    a["is_sell"]     = a["action"].apply(_is_sell)
-    a["is_div"]      = a["action"].apply(_is_div)
-    a["is_reinvest"] = a["action"].apply(_is_reinvest)
-    a["is_fee"]      = a["action"].apply(_is_fee)
+    a["is_buy"] = a["action"].apply(_is_buy)
+    a["is_sell"] = a["action"].apply(_is_sell)
+    a["is_div"] = a["action"].apply(_is_div)
 
     out: Dict[str, Dict[str, float]] = {}
     for s, g in a.groupby("symbol", sort=True):
-        buys      = g[g.is_buy]
-        sells     = g[g.is_sell]
-        divs      = g[g.is_div]
-        reinvests = g[g.is_reinvest]
-        fees      = g[g.is_fee]
+        buys = g[g.is_buy]
+        sells = g[g.is_sell]
+        divs = g[g.is_div]
 
         # shares from activity (used ONLY if positions missing)
         shares_delta = float(buys["qty"].sum() - sells["qty"].sum())
 
         # net invested (cash out on buys; cash in from sells)
         invested_out = float((-buys["amount"]).clip(lower=0).sum())
-        proceeds_in  = float((sells["amount"]).clip(lower=0).sum())
-        fee_out      = float((-fees["amount"]).clip(lower=0).sum())
-        net_invested_cash = invested_out + fee_out - proceeds_in
+        proceeds_in = float((sells["amount"]).clip(lower=0).sum())
+        net_invested_cash = invested_out - proceeds_in
 
         # dividends = ONLY the “DIVIDEND RECEIVED …” positives
-        div_cash   = float(divs["amount"].clip(lower=0).sum())
-        reinv_cash = float((-reinvests["amount"]).clip(lower=0).sum())
-        dividends_received = div_cash + reinv_cash
+        dividends_received = float(divs["amount"].clip(lower=0).sum())
 
         out[s] = dict(
-            shares_delta=shares_delta + float(reinvests["qty"].sum()),
+            shares_delta=shares_delta,
             net_invested_cash=net_invested_cash,
             dividends_received=dividends_received,
         )
