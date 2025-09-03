@@ -29,6 +29,8 @@ npm start
 
 ...or...
 
+## Python
+
 Launch the python backend and web UI with:
 
 ```bash
