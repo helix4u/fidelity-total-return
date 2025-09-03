@@ -19,6 +19,14 @@ const app = express();
 const upload = multer({ dest: UPLOADS_DIR });
 const uploadPositions = multer({ dest: POSITIONS_DIR });
 
+function clearCsvs(folder) {
+  for (const f of fs.readdirSync(folder)) {
+    if (f.endsWith('.csv')) {
+      fs.unlinkSync(path.join(folder, f));
+    }
+  }
+}
+
 app.use('/app', express.static(path.join(ROOT, 'frontend')));
 
 app.get('/', (req, res) => {
@@ -50,6 +58,12 @@ app.post('/upload_positions', uploadPositions.single('file'), (req, res) => {
   res.json({ ok: true, filename: req.file.originalname, kind: 'positions' });
 });
 
+app.post('/clear', (req, res) => {
+  clearCsvs(UPLOADS_DIR);
+  clearCsvs(POSITIONS_DIR);
+  res.json({ ok: true });
+});
+
 function readManyCsv(folder) {
   const files = fs.readdirSync(folder).filter(f => f.endsWith('.csv'));
   let rows = [];
@@ -79,8 +93,8 @@ function readManyCsv(folder) {
 async function servePortfolio(req, res) {
   const actRows = readManyCsv(UPLOADS_DIR);
   const posRows = readManyCsv(POSITIONS_DIR);
-  if (actRows.length === 0 && posRows.length === 0) {
-    return res.status(400).json({ detail: 'Upload an activity CSV and/or a positions CSV first' });
+  if (actRows.length === 0 || posRows.length === 0) {
+    return res.status(400).json({ detail: 'Upload both an activity CSV and a positions CSV first' });
   }
   console.log(`Computing portfolio for ${actRows.length} activity rows and ${posRows.length} position rows`);
   const summary = computePortfolioSummary(actRows, posRows);

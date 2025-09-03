@@ -27,6 +27,21 @@ function normSymbol(x) {
   return s;
 }
 
+const SYMBOL_FROM_DESC = /^([A-Z][A-Z0-9\.]{0,9})/;
+const SYMBOL_IN_PARENS = /\(([A-Z][A-Z0-9\.]{0,9})\)/;
+
+function extractSymbol(symRaw, desc, action) {
+  const norm = normSymbol(symRaw);
+  if (norm) return norm;
+  const d = (desc || '').trim().toUpperCase();
+  const a = (action || '').toUpperCase();
+  const paren = a.match(SYMBOL_IN_PARENS) || d.match(SYMBOL_IN_PARENS);
+  if (paren) return normSymbol(paren[1]);
+  const m = d.match(SYMBOL_FROM_DESC);
+  if (m) return normSymbol(m[1]);
+  return null;
+}
+
 function toNumber(val) {
   if (val === undefined || val === null) return 0;
   let s = String(val).trim();
@@ -57,10 +72,10 @@ function aggregateActivity(rows) {
     const action = String(row['Action'] || '');
     const symRaw = String(row['Symbol'] || '');
     const desc = String(row['Description'] || '');
+    const sym = extractSymbol(symRaw, desc, action);
+    if (!sym || isCashLike(symRaw, desc)) continue;
     const qty = toNumber(row['Quantity']);
     const amount = toNumber(row['Amount ($)'] ?? row['Amount'] ?? row['Net Amount'] ?? row['Net Amount ($)']);
-    const sym = normSymbol(symRaw);
-    if (!sym || isCashLike(symRaw, desc)) continue;
     const isBuy = BUY_PAT.test(action) || REINVEST_PAT.test(action);
     const isSell = SELL_PAT.test(action);
     const isDiv = DIV_PAT.test(action);
@@ -86,7 +101,7 @@ function parsePositions(rows) {
   for (const row of rows) {
     const symRaw = String(row['Symbol'] || '');
     const desc = String(row['Description'] || '');
-    const sym = normSymbol(symRaw);
+    const sym = extractSymbol(symRaw, desc);
     if (!sym || isCashLike(symRaw, desc)) continue;
     const qty = toNumber(row['Quantity']);
     if (qty <= 0) continue;
