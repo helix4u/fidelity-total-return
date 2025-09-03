@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
   if (fs.existsSync(idx)) {
     res.sendFile(idx);
   } else {
-    res.status(500).send('<pre>Frontend missing</pre>');
+    res.status(500).send(`<pre>Frontend missing</pre><p>Support the project on <a href="https://ko-fi.com/gille" target="_blank">Ko-fi</a>.</p>`);
   }
 });
 
@@ -149,4 +149,5 @@ app.get('/recalc', wrapAsync(servePortfolio));
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Node Total Return server running on ${PORT}`);
+  console.log('Support the project at https://ko-fi.com/gille');
 });
