@@ -44,24 +44,31 @@ def home():
     return HTMLResponse(index.read_text(encoding="utf-8"))
 
 @app.post("/upload")
-async def upload_csv(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".csv"):
-        raise HTTPException(status_code=400, detail="Upload a .csv file")
+async def upload_csv(files: list[UploadFile] = File(...)):
+    # always start fresh to avoid duplicates across overlapping exports
     _clear_csvs(UPLOADS_DIR)
-    dest = UPLOADS_DIR / file.filename
-    with dest.open("wb") as out:
-        shutil.copyfileobj(file.file, out)
-    return {"ok": True, "filename": file.filename, "kind": "activity"}
+    saved = []
+    for file in files:
+        if not file.filename.lower().endswith(".csv"):
+            raise HTTPException(status_code=400, detail=f"Upload a .csv file, got: {file.filename}")
+        dest = UPLOADS_DIR / file.filename
+        with dest.open("wb") as out:
+            shutil.copyfileobj(file.file, out)
+        saved.append(file.filename)
+    return {"ok": True, "filenames": saved, "kind": "activity"}
 
 @app.post("/upload_positions")
-async def upload_positions_csv(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".csv"):
-        raise HTTPException(status_code=400, detail="Upload a .csv file")
+async def upload_positions_csv(files: list[UploadFile] = File(...)):
     _clear_csvs(POSITIONS_DIR)
-    dest = POSITIONS_DIR / file.filename
-    with dest.open("wb") as out:
-        shutil.copyfileobj(file.file, out)
-    return {"ok": True, "filename": file.filename, "kind": "positions"}
+    saved = []
+    for file in files:
+        if not file.filename.lower().endswith(".csv"):
+            raise HTTPException(status_code=400, detail=f"Upload a .csv file, got: {file.filename}")
+        dest = POSITIONS_DIR / file.filename
+        with dest.open("wb") as out:
+            shutil.copyfileobj(file.file, out)
+        saved.append(file.filename)
+    return {"ok": True, "filenames": saved, "kind": "positions"}
 
 def _read_many_csvs(folder: Path) -> pd.DataFrame | None:
     files = list(folder.glob("*.csv"))
@@ -117,7 +124,8 @@ def portfolio():
         "total_return_dollars": total_mv + total_divs - total_invested,
         "total_return_percent": ((total_mv + total_divs - total_invested) / total_invested * 100.0) if total_invested > 0 else None,
     }
-    # remove uploaded files to require fresh uploads next time
-    _clear_csvs(UPLOADS_DIR)
-    _clear_csvs(POSITIONS_DIR)
+    # keep files for inspection unless you want strict one-shot mode.
+    # if you want the old behavior, uncomment the two lines below.
+    # _clear_csvs(UPLOADS_DIR)
+    # _clear_csvs(POSITIONS_DIR)
     return {"rows": summary, "overall": overall, "missing_prices": [s for s, p in prices.items() if p is None]}
