@@ -7,8 +7,11 @@ import numpy as np
 import pandas as pd
 
 # ---------- helpers ----------
-BUY_PAT = re.compile(r"YOU\s+BOUGHT", re.I)
-SELL_PAT = re.compile(r"YOU\s+SOLD", re.I)
+# Match generic BUY/SELL verbs so that activity rows lacking the leading
+# "YOU" prefix are still captured. Fidelity exports sometimes abbreviate
+# the action as simply "BOUGHT"/"SOLD", which previously went unnoticed.
+BUY_PAT = re.compile(r"BOUGHT", re.I)
+SELL_PAT = re.compile(r"SOLD", re.I)
 REINVEST_PAT = re.compile(r"REINVESTMENT", re.I)
 DIV_PAT = re.compile(r"DIVIDEND\s+RECEIVED", re.I)
 
