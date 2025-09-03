@@ -4,28 +4,37 @@
   <meta charset="utf-8">
   <title>Total Return</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
   <style>
     :root{
-      --bg:#0d1321;
-      --panel:#141c2f;
-      --panel-2:#10182a;
+      --bg:#0f172a;        /* slate black */
+      --panel:#111827;     /* slate-900 */
+      --panel-2:#0b1220;   /* deeper slate */
       --text:#e6eefc;
       --muted:#8aa0c2;
       --accent:#3b82f6;
       --green:#20c997;
       --red:#ef4444;
       --yellow:#f59e0b;
-      --border:#26324a;
-      --chip:#0f1a30;
+      --border:#1f2a3d;    /* slate border */
+      --chip:#0f172a;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      background:linear-gradient(180deg,#0b1222 0%, #0c1426 60%, #0b1222 100%);
+      background:#0f172a; /* slate black */
       color:var(--text);
       font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     }
+    /* Scrollbar/overflow color to match slate black */
+    html, body { background-color:#0f172a; }
+    /* Firefox */
+    html{ scrollbar-color:#334155 #0f172a; scrollbar-width:thin; }
+    /* WebKit */
+    ::-webkit-scrollbar{ width:10px; height:10px; }
+    ::-webkit-scrollbar-track{ background:#0f172a; }
+    ::-webkit-scrollbar-thumb{ background:#334155; border-radius:8px; border:2px solid #0f172a; }
     .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
     .title{font-size:22px;font-weight:700;margin:0 0 16px}
     .card{
