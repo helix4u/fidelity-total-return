@@ -31,16 +31,10 @@ npm start
 
 ## Python
 
-Launch the python backend and web UI with:
-
-```bash
-./run.sh
-```
-
 On Windows use:
 
 ```
-run.bat
+run_python.bat
 ```
 
 The server listens on http://127.0.0.1:8000/.
