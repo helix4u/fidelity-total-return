@@ -7,10 +7,13 @@ import numpy as np
 import pandas as pd
 
 # ---------- helpers ----------
-BUY_PAT = re.compile(r"YOU\s+BOUGHT", re.I)
-SELL_PAT = re.compile(r"YOU\s+SOLD", re.I)
-REINVEST_PAT = re.compile(r"REINVESTMENT", re.I)
-DIV_PAT = re.compile(r"DIVIDEND\s+RECEIVED", re.I)
+# Match generic BUY/SELL verbs so that activity rows lacking the leading
+# "YOU" prefix are still captured. Fidelity exports sometimes abbreviate
+# the action as simply "BOUGHT"/"SOLD", which previously went unnoticed.
+BUY_PAT = re.compile(r"BOUGHT", re.I)
+SELL_PAT = re.compile(r"SOLD", re.I)
+REINVEST_PAT = re.compile(r"REINVEST", re.I)
+DIV_PAT = re.compile(r"DIVIDEND", re.I)
 
 CASH_TICKERS = {
     "SPAXX", "FDRXX", "VMFXX", "SWVXX", "SPRXX", "SNVXX", "FCASH",
@@ -67,13 +70,16 @@ def _dedupe(df: Optional[pd.DataFrame]) -> pd.DataFrame:
     return df
 
 def _is_buy(action: str) -> bool:
-    return bool(action and (BUY_PAT.search(action) or REINVEST_PAT.search(action)))
+    return bool(action and BUY_PAT.search(action))
 
 def _is_sell(action: str) -> bool:
     return bool(action and SELL_PAT.search(action))
 
+def _is_reinvest(action: str) -> bool:
+    return bool(action and REINVEST_PAT.search(action))
+
 def _is_div(action: str) -> bool:
-    return bool(action and DIV_PAT.search(action))
+    return bool(action and DIV_PAT.search(action) and not _is_reinvest(action))
 
 # ---------- activity ----------
 def aggregate_activity(df: Optional[pd.DataFrame]) -> Dict[str, Dict[str, float]]:
@@ -92,31 +98,42 @@ def aggregate_activity(df: Optional[pd.DataFrame]) -> Dict[str, Dict[str, float]
 
     qty = _to_number(_get_col(df, ["Quantity"]), n)
     amount = _to_number(_get_col(df, ["Amount ($)", "Amount", "Net Amount", "Net Amount ($)"]), n)
+    commission = _to_number(_get_col(df, ["Commission ($)", "Commission"]), n)
+    fees = _to_number(_get_col(df, ["Fees ($)", "Fees"]), n)
 
     sym = sym_raw.apply(_norm_symbol)
     keep = sym.notna() & pd.Series([not _is_cash_like(sym_raw.iat[i], desc.iat[i]) for i in range(n)])
 
-    a = pd.DataFrame({"action": action, "symbol": sym, "qty": qty, "amount": amount})[keep].copy()
+    a = pd.DataFrame({
+        "action": action,
+        "symbol": sym,
+        "qty": qty,
+        "amount": amount,
+        "commission": commission,
+        "fees": fees,
+    })[keep].copy()
     a["is_buy"] = a["action"].apply(_is_buy)
     a["is_sell"] = a["action"].apply(_is_sell)
+    a["is_reinvest"] = a["action"].apply(_is_reinvest)
     a["is_div"] = a["action"].apply(_is_div)
 
     out: Dict[str, Dict[str, float]] = {}
     for s, g in a.groupby("symbol", sort=True):
         buys = g[g.is_buy]
         sells = g[g.is_sell]
+        reinv = g[g.is_reinvest]
         divs = g[g.is_div]
 
         # shares from activity (used ONLY if positions missing)
-        shares_delta = float(buys["qty"].sum() - sells["qty"].sum())
+        shares_delta = float(buys["qty"].sum() + reinv["qty"].sum() - sells["qty"].sum())
 
         # net invested (cash out on buys; cash in from sells)
-        invested_out = float((-buys["amount"]).clip(lower=0).sum())
-        proceeds_in = float((sells["amount"]).clip(lower=0).sum())
+        invested_out = float((-buys["amount"]).clip(lower=0).sum() + buys["commission"].abs().sum() + buys["fees"].abs().sum())
+        proceeds_in = float((sells["amount"] - sells["commission"].abs() - sells["fees"].abs()).clip(lower=0).sum())
         net_invested_cash = invested_out - proceeds_in
-
-        # dividends = ONLY the “DIVIDEND RECEIVED …” positives
-        dividends_received = float(divs["amount"].clip(lower=0).sum())
+        
+        # dividends: cash dividends + reinvested amounts
+        dividends_received = float(divs["amount"].clip(lower=0).sum() + (-reinv["amount"]).clip(lower=0).sum())
 
         out[s] = dict(
             shares_delta=shares_delta,
