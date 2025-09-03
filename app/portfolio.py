@@ -108,11 +108,13 @@ def aggregate_activity(df: Optional[pd.DataFrame]) -> Dict[str, Dict[str, float]
         divs = g[g.is_div]
 
         # shares from activity (used ONLY if positions missing)
-        shares_delta = float(buys["qty"].sum() - sells["qty"].sum())
+        # Use absolute quantities so negative quantities in CSV don't invert logic
+        shares_delta = float(buys["qty"].abs().sum() - sells["qty"].abs().sum())
 
         # net invested (cash out on buys; cash in from sells)
-        invested_out = float((-buys["amount"]).clip(lower=0).sum())
-        proceeds_in = float((sells["amount"]).clip(lower=0).sum())
+        # Use absolute amounts to be robust to CSV sign conventions
+        invested_out = float(buys["amount"].abs().sum())
+        proceeds_in = float(sells["amount"].abs().sum())
         net_invested_cash = invested_out - proceeds_in
 
         # dividends = ONLY the “DIVIDEND RECEIVED …” positives
@@ -161,21 +163,17 @@ def compute_portfolio_summary(activity_df: Optional[pd.DataFrame],
     act = aggregate_activity(activity_df)
     pos = parse_positions(positions_df)
 
-    symbols = sorted(set(act.keys()) | set(pos.keys()))
+    # Positions are doctrine: only include symbols present in positions
+    symbols = sorted(set(pos.keys()))
     rows: List[Dict[str, float]] = []
 
     for s in symbols:
         # Positions are authoritative for shares. Do NOT add activity shares on top.
-        if s in pos:
-            shares = pos[s]["base_shares"]
-            invested = pos[s]["cost_basis"]
-            # If positions file doesn’t carry a cost basis, fall back to activity net invested.
-            if invested <= 0 and s in act:
-                invested = max(invested, act[s].get("net_invested_cash", 0.0))
-        else:
-            # No positions row -> use activity-only view
-            shares = act.get(s, {}).get("shares_delta", 0.0)
-            invested = act.get(s, {}).get("net_invested_cash", 0.0)
+        shares = pos[s]["base_shares"]
+        invested = pos[s]["cost_basis"]
+        # If positions file doesn’t carry a cost basis, fall back to activity net invested.
+        if invested <= 0 and s in act:
+            invested = max(invested, act[s].get("net_invested_cash", 0.0))
 
         divs = act.get(s, {}).get("dividends_received", 0.0)
 

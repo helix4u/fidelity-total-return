@@ -108,6 +108,15 @@ async function servePortfolio(req, res) {
     const invested = row.net_invested_cash;
     const divs = row.dividends_received;
     const mv = row.market_value != null ? row.market_value : 0;
+    // Market gain/loss excludes dividends
+    if (row.market_value == null && row.shares > 0) {
+      row.market_gain_dollars = null;
+      row.market_gain_percent = null;
+    } else {
+      const mg = mv - invested;
+      row.market_gain_dollars = mg;
+      row.market_gain_percent = invested > 0 ? (mg / invested) * 100 : null;
+    }
     if (row.market_value == null && row.shares > 0) {
       row.total_return_dollars = null;
       row.total_return_percent = null;
@@ -124,6 +133,8 @@ async function servePortfolio(req, res) {
     invested: total_invested,
     dividends: total_divs,
     market_value: total_mv,
+    market_gain_dollars: total_mv - total_invested,
+    market_gain_percent: total_invested > 0 ? (total_mv - total_invested) / total_invested * 100 : null,
     total_return_dollars: total_mv + total_divs - total_invested,
     total_return_percent: total_invested > 0 ? (total_mv + total_divs - total_invested) / total_invested * 100 : null
   };

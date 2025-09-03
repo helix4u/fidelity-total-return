@@ -1,2 +1,39 @@
-node-app/node_modules/
+# Data and uploads (may contain personal info)
+data/
+*.csv
+
+# Environment and secrets
+.env
+.env.*
+*.env
+
+# Python artifacts
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.cache/
+coverage/
+.coverage
+
+# Node artifacts
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 node-app/package-lock.json
+
+# Logs and build outputs
+*.log
+logs/
+dist/
+build/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

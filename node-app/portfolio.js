@@ -81,12 +81,16 @@ function aggregateActivity(rows) {
     const isDiv = DIV_PAT.test(action);
     if (!out[sym]) out[sym] = { shares_delta: 0, net_invested_cash: 0, dividends_received: 0 };
     if (isBuy) {
-      out[sym].shares_delta += qty;
-      out[sym].net_invested_cash += -Math.min(amount, 0);
+      // Some exports record sell quantities as negative; use magnitude
+      out[sym].shares_delta += Math.abs(qty);
+      // Treat buy cash outflow by magnitude to handle sign variants
+      out[sym].net_invested_cash += Math.abs(amount);
     }
     if (isSell) {
-      out[sym].shares_delta -= qty;
-      out[sym].net_invested_cash -= Math.max(amount, 0);
+      // Ensure sells reduce shares even if qty is negative in the CSV
+      out[sym].shares_delta -= Math.abs(qty);
+      // Treat sell proceeds by magnitude to handle sign variants
+      out[sym].net_invested_cash -= Math.abs(amount);
     }
     if (isDiv) {
       out[sym].dividends_received += Math.max(amount, 0);
@@ -116,20 +120,16 @@ function parsePositions(rows) {
 function computePortfolioSummary(activityRows, positionsRows) {
   const act = aggregateActivity(activityRows);
   const pos = parsePositions(positionsRows);
-  const symbols = Array.from(new Set([...Object.keys(act), ...Object.keys(pos)])).sort();
+  // Positions are doctrine: only report symbols that exist in positions
+  const symbols = Object.keys(pos).sort();
   const rows = [];
   for (const s of symbols) {
     let shares;
     let invested;
-    if (pos[s]) {
-      shares = pos[s].base_shares;
-      invested = pos[s].cost_basis;
-      if (invested <= 0 && act[s]) {
-        invested = Math.max(invested, act[s].net_invested_cash);
-      }
-    } else {
-      shares = act[s]?.shares_delta || 0;
-      invested = act[s]?.net_invested_cash || 0;
+    shares = pos[s].base_shares;
+    invested = pos[s].cost_basis;
+    if (invested <= 0 && act[s]) {
+      invested = Math.max(invested, act[s].net_invested_cash);
     }
     const divs = act[s]?.dividends_received || 0;
     rows.push({

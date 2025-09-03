@@ -99,6 +99,15 @@ def portfolio():
         divs = row["dividends_received"]
         mv = row["market_value"] if row["market_value"] is not None else 0.0
 
+        # Market gain/loss excludes dividends
+        if row["market_value"] is None and row["shares"] > 0:
+            row["market_gain_dollars"] = None
+            row["market_gain_percent"] = None
+        else:
+            mg = mv - invested
+            row["market_gain_dollars"] = mg
+            row["market_gain_percent"] = (mg / invested) * 100.0 if invested > 0 else None
+
         if row["market_value"] is None and row["shares"] > 0:
             row["total_return_dollars"] = None
             row["total_return_percent"] = None
@@ -114,6 +123,8 @@ def portfolio():
         "invested": total_invested,
         "dividends": total_divs,
         "market_value": total_mv,
+        "market_gain_dollars": total_mv - total_invested,
+        "market_gain_percent": ((total_mv - total_invested) / total_invested * 100.0) if total_invested > 0 else None,
         "total_return_dollars": total_mv + total_divs - total_invested,
         "total_return_percent": ((total_mv + total_divs - total_invested) / total_invested * 100.0) if total_invested > 0 else None,
     }

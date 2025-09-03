@@ -80,6 +80,8 @@
       border-bottom:1px solid var(--border);
       padding:10px 10px;
       white-space:nowrap;
+      position:sticky; top:0; z-index:2;
+      background:linear-gradient(180deg,var(--panel) 0%, var(--panel-2) 100%);
     }
     tbody td{
       border-bottom:1px dashed #1d2a44;
@@ -93,6 +95,8 @@
     .pos{color:var(--green);font-weight:700}
     .neg{color:var(--red);font-weight:700}
     .warn{color:var(--yellow)}
+    .sortable{cursor:pointer; user-select:none}
+    .th-ind{margin-left:6px; opacity:.8}
     .toolbar{display:flex;gap:10px;align-items:center;margin-top:8px}
     .small{font-size:12px}
     .pill{padding:6px 10px;border-radius:999px;background:#0e1730;border:1px solid var(--border)}
@@ -141,14 +145,16 @@
       <table id="tbl">
         <thead>
           <tr>
-            <th>Symbol</th>
-            <th class="right">Shares</th>
-            <th class="right">Invested</th>
-            <th class="right">Dividends</th>
-            <th class="right">Price</th>
-            <th class="right">Market Value</th>
-            <th class="right">Total Return $</th>
-            <th class="right">Total Return %</th>
+            <th class="sortable" data-key="symbol">Symbol <span class="th-ind" id="ind-symbol"></span></th>
+            <th class="right sortable" data-key="shares">Shares <span class="th-ind" id="ind-shares"></span></th>
+            <th class="right sortable" data-key="net_invested_cash">Invested <span class="th-ind" id="ind-net_invested_cash"></span></th>
+            <th class="right sortable" data-key="dividends_received">Dividends <span class="th-ind" id="ind-dividends_received"></span></th>
+            <th class="right sortable" data-key="current_price">Price <span class="th-ind" id="ind-current_price"></span></th>
+            <th class="right sortable" data-key="market_value">Market Value <span class="th-ind" id="ind-market_value"></span></th>
+            <th class="right sortable" data-key="market_gain_dollars">Market Gain $ <span class="th-ind" id="ind-market_gain_dollars"></span></th>
+            <th class="right sortable" data-key="market_gain_percent">Market Gain % <span class="th-ind" id="ind-market_gain_percent"></span></th>
+            <th class="right sortable" data-key="total_return_dollars">Total Return $ <span class="th-ind" id="ind-total_return_dollars"></span></th>
+            <th class="right sortable" data-key="total_return_percent">Total Return % <span class="th-ind" id="ind-total_return_percent"></span></th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -166,6 +172,35 @@
     const rowsEl = $("#rows");
     const emptyEl = $("#empty");
     const missingEl = $("#missing");
+    let sortKey = 'symbol';
+    let sortDir = 'asc'; // 'asc' | 'desc'
+    let lastRows = [];
+    const numericKeys = new Set(['shares','net_invested_cash','dividends_received','current_price','market_value','market_gain_dollars','market_gain_percent','total_return_dollars','total_return_percent']);
+
+    function updateSortIndicators(){
+      document.querySelectorAll('thead th .th-ind').forEach(el => el.textContent = '');
+      const ind = $("#ind-"+sortKey);
+      if (ind) ind.textContent = sortDir === 'asc' ? '▲' : '▼';
+    }
+
+    function cmp(a,b){
+      let av = a?.[sortKey];
+      let bv = b?.[sortKey];
+      const numeric = numericKeys.has(sortKey);
+      const missingA = (av===null || av===undefined || (numeric && isNaN(Number(av))));
+      const missingB = (bv===null || bv===undefined || (numeric && isNaN(Number(bv))));
+      if (missingA && missingB) return 0;
+      if (missingA) return 1; // push missing to bottom
+      if (missingB) return -1;
+      if (numeric){
+        av = Number(av); bv = Number(bv);
+      } else {
+        av = String(av).toUpperCase(); bv = String(bv).toUpperCase();
+      }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    }
 
     function fmtCurrency(v){
       if (v === null || v === undefined) return "n/a";
@@ -242,6 +277,7 @@
         rowsEl.innerHTML = "";
         emptyEl.classList.remove("hidden");
         missingEl.textContent = "";
+        lastRows = [];
       } catch(err) {
         missingEl.textContent = "Error: " + err.message;
       } finally {
@@ -264,7 +300,9 @@
         return;
       }
       emptyEl.classList.add("hidden");
-      for (const r of rows){
+      const sorted = rows.slice().sort(cmp);
+      updateSortIndicators();
+      for (const r of sorted){
         const tr = document.createElement("tr");
 
         const tdSym = document.createElement("td");
@@ -295,6 +333,26 @@
         tdMV.className = "right mono";
         tdMV.textContent = r.market_value==null ? "n/a" : fmtCurrency(r.market_value);
         tr.appendChild(tdMV);
+
+        const tdMG$ = document.createElement("td");
+        tdMG$.className = "right mono";
+        if (r.market_gain_dollars==null){
+          tdMG$.innerHTML = '<span class="warn">n/a</span>';
+        }else{
+          const cls = r.market_gain_dollars >= 0 ? "pos" : "neg";
+          tdMG$.innerHTML = '<span class="'+cls+'">'+fmtCurrency(r.market_gain_dollars)+'</span>';
+        }
+        tr.appendChild(tdMG$);
+
+        const tdMGp = document.createElement("td");
+        tdMGp.className = "right mono";
+        if (r.market_gain_percent==null){
+          tdMGp.innerHTML = '<span class="warn">n/a</span>';
+        }else{
+          const cls = r.market_gain_percent >= 0 ? "pos" : "neg";
+          tdMGp.innerHTML = '<span class="'+cls+'">'+fmtPct(r.market_gain_percent)+'</span>';
+        }
+        tr.appendChild(tdMGp);
 
         const tdTR$ = document.createElement("td");
         tdTR$.className = "right mono";
@@ -330,8 +388,10 @@
           throw new Error(txt || "Server error");
         }
         const data = await r.json();
+        const rows = data.rows || [];
+        lastRows = rows;
         paintSummary(data.overall || {invested:0,dividends:0,market_value:0,total_return_dollars:0,total_return_percent:null});
-        paintTable(data.rows || []);
+        paintTable(lastRows);
         const missing = (data.missing_prices || []).filter(Boolean);
         if (missing.length){
           missingEl.textContent = "Missing prices: " + missing.join(", ");
@@ -343,13 +403,46 @@
         rowsEl.innerHTML = "";
         emptyEl.classList.remove("hidden");
         missingEl.textContent = "Error: " + (err.message || err);
+        lastRows = [];
       }finally{
         btn.disabled = false;
       }
     }
 
+    // Hook up sorting
+    document.querySelectorAll('thead th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.getAttribute('data-key');
+        if (!key) return;
+        if (sortKey === key){
+          sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortKey = key;
+          sortDir = 'asc';
+        }
+        // Re-render using cached rows; avoid re-calling server since uploads are cleared after compute
+        paintTable(lastRows);
+      });
+    });
+
     // Initial try; harmless if no files yet
     refresh();
   </script>
+  <div class="wrap" style="margin-top:8px">
+    <div class="card">
+      <div class="title" style="font-size:16px;margin-bottom:8px">Legend: How calculations work</div>
+      <div class="small muted">
+        <div><strong>Shares</strong>: From positions file (authoritative).</div>
+        <div><strong>Invested</strong>: Cost basis from positions; if missing/0, falls back to net invested from activity (cash out on buys minus proceeds from sells).</div>
+        <div><strong>Dividends</strong>: Sum of positive amounts for “DIVIDEND RECEIVED …” in activity.</div>
+        <div><strong>Price</strong>: Latest close from Yahoo Finance.</div>
+        <div><strong>Market Value</strong>: current price × shares.</div>
+        <div><strong>Market Gain $</strong>: market value − invested (excludes dividends).</div>
+        <div><strong>Market Gain %</strong>: market gain $ ÷ invested × 100 (if invested &gt; 0).</div>
+        <div><strong>Total Return $</strong>: market value + dividends − invested.</div>
+        <div><strong>Total Return %</strong>: total return $ ÷ invested × 100 (if invested &gt; 0).</div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
