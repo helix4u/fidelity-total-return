@@ -1,5 +1,7 @@
 # Fidelity Total Return
 
+not exactly for public consumption. sells may inflate sense of return, etc. may need some polish here and there. but for my usecase of holding div stocks... seems fine. 
+
 Calculate portfolio total return, including dividends, from Fidelity CSV exports. Two backends are provided (Node.js and Python/FastAPI) that serve a shared minimal frontend.
 
 ## What’s Included
