@@ -4,8 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parse } from 'csv-parse/sync';
-import { computePortfolioSummary } from './portfolio.js';
-import { getCurrentPrices } from './priceProviders.js';
+import { buildPortfolioModel } from './portfolio.js';
+import { computePortfolioPerformance } from './performance.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -93,58 +93,11 @@ async function servePortfolio(req, res) {
     return res.status(400).json({ detail: 'Upload both an activity CSV and a positions CSV first' });
   }
   console.log(`Computing portfolio for ${actRows.length} activity rows and ${posRows.length} position rows`);
-  const summary = computePortfolioSummary(actRows, posRows);
-  const symbols = summary.map(r => r.symbol);
-  let prices = {};
-  try {
-    prices = await getCurrentPrices(symbols);
-  } catch (err) {
-    console.error('Price lookup failed', err);
-  }
-  for (const row of summary) {
-    const price = prices[row.symbol];
-    row.current_price = price;
-    row.market_value = price != null ? price * row.shares : null;
-    const invested = row.net_invested_cash;
-    const divs = row.dividends_received;
-    const mv = row.market_value != null ? row.market_value : 0;
-    // Dividend return percent (realized dividends over invested cash)
-    row.dividend_return_percent = invested > 0 ? (divs / invested) * 100 : null;
-    // Market gain/loss excludes dividends
-    if (row.market_value == null && row.shares > 0) {
-      row.market_gain_dollars = null;
-      row.market_gain_percent = null;
-    } else {
-      const mg = mv - invested;
-      row.market_gain_dollars = mg;
-      row.market_gain_percent = invested > 0 ? (mg / invested) * 100 : null;
-    }
-    if (row.market_value == null && row.shares > 0) {
-      row.total_return_dollars = null;
-      row.total_return_percent = null;
-    } else {
-      const tr = mv + divs - invested;
-      row.total_return_dollars = tr;
-      row.total_return_percent = invested > 0 ? (tr / invested) * 100 : null;
-    }
-  }
-  const total_invested = summary.reduce((a, r) => a + r.net_invested_cash, 0);
-  const total_divs = summary.reduce((a, r) => a + r.dividends_received, 0);
-  const total_mv = summary.reduce((a, r) => a + (r.market_value || 0), 0);
-  const overall = {
-    invested: total_invested,
-    dividends: total_divs,
-    market_value: total_mv,
-    market_gain_dollars: total_mv - total_invested,
-    market_gain_percent: total_invested > 0 ? (total_mv - total_invested) / total_invested * 100 : null,
-    dividend_return_percent: total_invested > 0 ? (total_divs / total_invested) * 100 : null,
-    total_return_dollars: total_mv + total_divs - total_invested,
-    total_return_percent: total_invested > 0 ? (total_mv + total_divs - total_invested) / total_invested * 100 : null
-  };
-  const missing_prices = symbols.filter(s => prices[s] == null);
+  const model = buildPortfolioModel(actRows, posRows);
+  const result = await computePortfolioPerformance(model);
   clearCsvs(UPLOADS_DIR);
   clearCsvs(POSITIONS_DIR);
-  res.json({ rows: summary, overall, missing_prices });
+  res.json(result);
 }
 
 function wrapAsync(fn) {
@@ -165,3 +118,4 @@ app.listen(PORT, () => {
   console.log(`Node Total Return server running on ${PORT}`);
   console.log('Support the project at https://ko-fi.com/gille');
 });
+

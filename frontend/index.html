@@ -7,45 +7,40 @@
   <meta name="theme-color" content="#0f172a">
   <style>
     :root{
-      --bg:#0f172a;        /* slate black */
-      --panel:#111827;     /* slate-900 */
-      --panel-2:#0b1220;   /* deeper slate */
+      --bg:#0f172a;
+      --panel:#111827;
+      --panel-2:#0b1220;
       --text:#e6eefc;
       --muted:#8aa0c2;
       --accent:#3b82f6;
-      --green:#20c997;
+      --green:#22c55e;
       --red:#ef4444;
       --yellow:#f59e0b;
-      --border:#1f2a3d;    /* slate border */
-      --chip:#0f172a;
+      --border:#1f2a3d;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{box-sizing:border-box;}
+    html,body{height:100%;}
     body{
       margin:0;
-      background:#0f172a; /* slate black */
+      background:var(--bg);
       color:var(--text);
       font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     }
-    /* Scrollbar/overflow color to match slate black */
-    html, body { background-color:#0f172a; }
-    /* Firefox */
-    html{ scrollbar-color:#334155 #0f172a; scrollbar-width:thin; }
-    /* WebKit */
-    ::-webkit-scrollbar{ width:10px; height:10px; }
-    ::-webkit-scrollbar-track{ background:#0f172a; }
-    ::-webkit-scrollbar-thumb{ background:#334155; border-radius:8px; border:2px solid #0f172a; }
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .title{font-size:22px;font-weight:700;margin:0 0 16px}
+    html{scrollbar-color:#334155 var(--bg);scrollbar-width:thin;}
+    ::-webkit-scrollbar{width:10px;height:10px;}
+    ::-webkit-scrollbar-track{background:var(--bg);}
+    ::-webkit-scrollbar-thumb{background:#334155;border-radius:8px;border:2px solid var(--bg);}
+    .wrap{max-width:1380px;margin:24px auto;padding:0 16px;}
+    .title{font-size:22px;font-weight:700;margin:0 0 16px;}
     .card{
       background:linear-gradient(180deg,var(--panel) 0%, var(--panel-2) 100%);
       border:1px solid var(--border);
       border-radius:12px;
       padding:16px;
       box-shadow:0 6px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.02);
+      margin-bottom:16px;
     }
-    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .row + .row{margin-top:10px}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
     input[type=file]{
       display:inline-block;
       padding:8px;
@@ -63,58 +58,124 @@
       border-radius:10px;
       cursor:pointer;
       font-weight:600;
+      transition:opacity .15s;
     }
     button.primary{
       border-color:#2450a8;
-      background:linear-gradient(180deg,#2351aa,#1a3e83);
+      background:linear-gradient(180deg,#2450a8,#1a3e83);
     }
-    button:disabled{opacity:.6;cursor:not-allowed}
-    .muted{color:var(--muted);font-size:12px}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    button.secondary{
+      border-color:#374151;
+      background:linear-gradient(180deg,#152032,#111a2a);
+    }
+    button:disabled{opacity:.6;cursor:not-allowed;}
+    select{
+      background:#0e1730;
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:6px 10px;
+      border-radius:8px;
+      min-width:140px;
+    }
+    .muted{color:var(--muted);}
+    .small{font-size:12px;}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
     .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
       background:linear-gradient(180deg,#0e1730,#0c1428);
       border:1px solid var(--border);
-      padding:6px 10px;
+      padding:6px 12px;
       border-radius:999px;
-      font-weight:700;
+      font-weight:600;
       font-size:12px;
       color:#bcd0f3;
     }
-    .chip strong{color:#fff;margin-left:6px}
-    table{width:100%;border-collapse:collapse;margin-top:14px}
+    .chip strong{color:#fff;}
+    .toolbar{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;}
+    .spacer{flex:1;}
+    .pill{
+      padding:6px 12px;
+      border-radius:999px;
+      background:#0e1730;
+      border:1px solid var(--border);
+      color:#bcd0f3;
+    }
+    .download-group{display:flex;gap:8px;flex-wrap:wrap;}
+    .table-wrap{margin-top:14px;overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;min-width:950px;}
     thead th{
       text-align:left;
       font-size:12px;
       color:#b7c7e6;
       border-bottom:1px solid var(--border);
-      padding:10px 10px;
+      padding:10px;
       white-space:nowrap;
-      position:sticky; top:0; z-index:2;
+      position:sticky;
+      top:0;
+      z-index:2;
       background:linear-gradient(180deg,var(--panel) 0%, var(--panel-2) 100%);
     }
     tbody td{
       border-bottom:1px dashed #1d2a44;
-      padding:10px 10px;
+      padding:10px;
       vertical-align:top;
       white-space:nowrap;
     }
-    tbody tr:hover{background:#0e1528}
-    .right{text-align:right}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-    .pos{color:var(--green);font-weight:700}
-    .neg{color:var(--red);font-weight:700}
-    .warn{color:var(--yellow)}
-    .sortable{cursor:pointer; user-select:none}
-    .th-ind{margin-left:6px; opacity:.8}
-    .toolbar{display:flex;gap:10px;align-items:center;margin-top:8px}
-    .small{font-size:12px}
-    .pill{padding:6px 10px;border-radius:999px;background:#0e1730;border:1px solid var(--border)}
-    .spacer{flex:1}
-    .note{margin-top:8px}
-    .hidden{display:none}
-    .support{margin-top:16px;text-align:center;font-size:12px}
-    .support a{color:var(--accent);text-decoration:none}
+    tbody tr:hover{background:#0e1528;}
+    tbody tr.closed-row td{opacity:0.75;}
+    .right{text-align:right;}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+    .pos{color:var(--green);font-weight:600;}
+    .neg{color:var(--red);font-weight:600;}
+    .warn{color:var(--yellow);}
+    .sortable{cursor:pointer;user-select:none;}
+    .th-ind{margin-left:6px;font-size:10px;color:var(--muted);}
+    .note{margin-top:8px;}
+    .hidden{display:none!important;}
+    .badge{
+      display:inline-block;
+      margin-left:8px;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      background:#312e81;
+      border:1px solid #4338ca;
+      color:#c7d2fe;
+    }
+    .badge.warn{
+      background:#9a3412;
+      border-color:#f59e0b;
+      color:#fde68a;
+    }
+    .table-meta{margin-top:4px;}
+    .chart-grid{display:flex;flex-direction:column;gap:20px;margin-top:12px;}
+    .chart-block{
+      display:flex;
+      flex-direction:column;
+      background:#0e1730;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:16px;
+      height:540px;
+      position:relative;
+    }
+    .chart-block.large{height:690px;}
+    .chart-block.medium{height:600px;}
+    .chart-block.small{height:400px;}
+    .chart-title{font-weight:600;font-size:13px;color:#c7d2fe;margin-bottom:8px;}
+    .chart-block canvas{flex:1;width:100% !important;height:100% !important;display:block;}
+    .chart-head{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+    #symbolMetrics{margin-top:4px;}
+    .support{margin-top:16px;text-align:center;font-size:12px;color:var(--muted);}
+    .support a{color:var(--accent);text-decoration:none;}
+    @media (max-width:768px){
+      canvas{height:240px;}
+      table{min-width:820px;}
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <div class="wrap">
@@ -125,345 +186,890 @@
         <form id="uploadActivity" class="row">
           <input type="file" id="activityFile" accept=".csv" multiple>
           <button type="submit">Upload activity CSVs</button>
-          <span id="statusA" class="muted"></span>
+          <span id="statusA" class="muted small"></span>
         </form>
       </div>
       <div class="row">
         <form id="uploadPositions" class="row">
           <input type="file" id="positionsFile" accept=".csv" multiple>
           <button type="submit">Upload positions CSVs</button>
-          <span id="statusP" class="muted"></span>
+          <span id="statusP" class="muted small"></span>
         </form>
       </div>
       <div class="toolbar">
-        <button id="recalc" class="primary">Recalculate</button>
-        <button id="clear">Clear</button>
+        <div class="download-group">
+          <button id="recalc" class="primary">Recalculate</button>
+          <button id="downloadResults">Download results (csv)</button>
+          <button id="clear" class="secondary">Clear uploads</button>
+        </div>
         <div class="spacer"></div>
-        <span class="small pill muted" id="missing"></span>
+        <button id="toggleClosed" class="pill secondary">Hide closed</button>
       </div>
-      <div class="chips" id="chips">
-        <span class="chip">Invested <strong id="chipInvested">0.00</strong></span>
-        <span class="chip">Dividends <strong id="chipDivs">0.00</strong></span>
-        <span class="chip">Market <strong id="chipMarket">0.00</strong></span>
-        <span class="chip">Total $ <strong id="chipTotal">0.00</strong></span>
-        <span class="chip">Total % <strong id="chipTotalPct">n/a</strong></span>
+      <div class="chips" id="summaryChips">
+        <span class="chip">Invested <strong id="chipInvested">$0</strong></span>
+        <span class="chip">Market value <strong id="chipMarketValue">$0</strong></span>
+        <span class="chip">Total return <strong id="chipTotalReturn">$0</strong></span>
+        <span class="chip">Total % <strong id="chipTotalPercent">n/a</strong></span>
+        <span class="chip">Dividends <strong id="chipDividends">$0</strong></span>
+        <span class="chip">Lifetime dividends <strong id="chipLifetimeDividends">$0</strong></span>
+        <span class="chip">Lifetime return <strong id="chipLifetimeReturn">$0</strong></span>
+        <span class="chip">TWR <strong id="chipTwr">n/a</strong></span>
+        <span class="chip">IRR <strong id="chipIrr">n/a</strong></span>
+      </div>
+      <div id="summaryNotes" class="muted small" style="margin-top:8px"></div>
+      <div id="missing" class="muted small" style="margin-top:4px"></div>
+    </div>
+
+    <div class="card">
+      <div id="tableMeta" class="muted small table-meta"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" data-key="symbol">Symbol <span class="th-ind" data-col="symbol"></span></th>
+              <th class="sortable right" data-key="shares">Shares <span class="th-ind" data-col="shares"></span></th>
+              <th class="sortable right" data-key="net_invested_cash">Invested <span class="th-ind" data-col="net_invested_cash"></span></th>
+              <th class="sortable right" data-key="dividends_received">Dividends <span class="th-ind" data-col="dividends_received"></span></th>
+              <th class="sortable right" data-key="dividend_return_percent">Div % <span class="th-ind" data-col="dividend_return_percent"></span></th>
+              <th class="sortable right" data-key="current_price">Price <span class="th-ind" data-col="current_price"></span></th>
+              <th class="sortable right" data-key="market_value">Value <span class="th-ind" data-col="market_value"></span></th>
+              <th class="sortable right" data-key="market_gain_dollars">Mkt $ <span class="th-ind" data-col="market_gain_dollars"></span></th>
+              <th class="sortable right" data-key="market_gain_percent">Mkt % <span class="th-ind" data-col="market_gain_percent"></span></th>
+              <th class="sortable right" data-key="total_return_dollars">Total $ <span class="th-ind" data-col="total_return_dollars"></span></th>
+              <th class="sortable right" data-key="total_return_percent">Total % <span class="th-ind" data-col="total_return_percent"></span></th>
+              <th class="sortable right" data-key="twr_percent">TWR % <span class="th-ind" data-col="twr_percent"></span></th>
+              <th class="sortable right" data-key="irr_percent">IRR % <span class="th-ind" data-col="irr_percent"></span></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="note muted">Upload activity & positions CSVs, then click Recalculate.</div>
+    </div>
+
+    <div class="card hidden" id="chartsCard">
+      <div class="chart-head">
+        <div class="muted small">Charts use cached Yahoo data (15 min TTL). Positive flows are withdrawals (sells/dividends).</div>
+        <div class="spacer"></div>
+        <label class="small muted">Symbol detail
+          <select id="symbolSelect">
+            <option value="">Select a holding...</option>
+          </select>
+        </label>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-block large">
+          <div class="chart-title">Portfolio NAV, cumulative return & daily volatility</div>
+          <canvas id="overallNavChart"></canvas>
+        </div>
+        <div class="chart-block small">
+          <div class="chart-title">Portfolio cash flows</div>
+          <canvas id="overallCashflowChart"></canvas>
+        </div>
+        <div class="chart-block medium hidden" id="symbolSection">
+          <div class="chart-title" id="symbolTitle">Symbol detail</div>
+          <div id="symbolMetrics" class="muted small"></div>
+          <canvas id="symbolChart"></canvas>
+        </div>
       </div>
     </div>
 
-    <div class="card" style="margin-top:16px">
-      <table id="tbl">
-        <thead>
-          <tr>
-            <th class="sortable" data-key="symbol">Symbol <span class="th-ind" id="ind-symbol"></span></th>
-            <th class="right sortable" data-key="shares">Shares <span class="th-ind" id="ind-shares"></span></th>
-            <th class="right sortable" data-key="net_invested_cash">Invested <span class="th-ind" id="ind-net_invested_cash"></span></th>
-            <th class="right sortable" data-key="dividends_received">Dividends <span class="th-ind" id="ind-dividends_received"></span></th>
-            <th class="right sortable" data-key="dividend_return_percent">Dividends % <span class="th-ind" id="ind-dividend_return_percent"></span></th>
-            <th class="right sortable" data-key="current_price">Price <span class="th-ind" id="ind-current_price"></span></th>
-            <th class="right sortable" data-key="market_value">Market Value <span class="th-ind" id="ind-market_value"></span></th>
-            <th class="right sortable" data-key="market_gain_dollars">Market Gain $ <span class="th-ind" id="ind-market_gain_dollars"></span></th>
-            <th class="right sortable" data-key="market_gain_percent">Market Gain % <span class="th-ind" id="ind-market_gain_percent"></span></th>
-            <th class="right sortable" data-key="total_return_dollars">Total Return $ <span class="th-ind" id="ind-total_return_dollars"></span></th>
-            <th class="right sortable" data-key="total_return_percent">Total Return % <span class="th-ind" id="ind-total_return_percent"></span></th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <div id="empty" class="note muted">Upload your CSVs, then click Recalculate.</div>
+    <div class="card">
+      <div class="title" style="font-size:16px;margin-bottom:8px;">Legend & notes</div>
+      <div class="small muted">
+        <div><strong>Shares</strong> stay in sync with the positions file. Closed tickers remain listed so lifetime return stays accurate.</div>
+        <div><strong>Invested</strong> prefers cost basis from positions; if absent we fall back to net cash invested from activity.</div>
+        <div><strong>Dividends</strong> include cash and reinvested payouts. Reinvestments add shares but do not count as external cash flows.</div>
+        <div><strong>Div %</strong> = dividends divided by invested cash.</div>
+        <div><strong>Mkt $ / Mkt %</strong> = market value minus invested cash, shown in dollars and as a percent of invested cash.</div>
+        <div><strong>Total $ / Total %</strong> = market value + dividends - invested, again in dollars and as a percent.</div>
+        <div><strong>NAV</strong> = net asset value per "unit" inside the unitized performance model.</div>
+        <div><strong>TWR</strong> (time-weighted return) chains each unitized period so cash flow timing is removed.</div>
+        <div><strong>IRR</strong> (money-weighted return) solves for the annualized rate that balances all cash flows and the current value.</div>
+        <div><strong>ROC?</strong> badges flag tickers whose dividends are likely return-of-capital (dividends high while price is underwater).</div>
+        <div><strong>Cash flows</strong>: buys are negative (capital in); sells and cash dividends are positive (capital out). Reinvested dividends net to zero.</div>
+        <div><strong>Charts</strong> use daily closes from Yahoo Finance; missing prices forward-fill the last close.</div>
+        <div>FastAPI clears uploads automatically; the Node backend exposes a <code>/clear</code> endpoint to wipe uploaded CSVs.</div>
+      </div>
     </div>
 
-    <div class="support muted">
-      Enjoy the tool? <a href="https://ko-fi.com/gille" target="_blank">Support it on Ko-fi</a>.
-    </div>
+    <div class="support">Enjoy the tool? <a href="https://ko-fi.com/gille" target="_blank" rel="noopener">Support it on Ko-fi</a>.</div>
   </div>
-
   <script>
-    const $ = sel => document.querySelector(sel);
-    const rowsEl = $("#rows");
-    const emptyEl = $("#empty");
-    const missingEl = $("#missing");
-    let sortKey = 'symbol';
-    let sortDir = 'asc'; // 'asc' | 'desc'
-    let lastRows = [];
-    const numericKeys = new Set(['shares','net_invested_cash','dividends_received','dividend_return_percent','current_price','market_value','market_gain_dollars','market_gain_percent','total_return_dollars','total_return_percent']);
+    (() => {
+      Chart.defaults.animation = false;
+      Chart.defaults.transitions.active.animation.duration = 0;
+      Chart.defaults.responsiveAnimationDuration = 0;
+      const $ = sel => document.querySelector(sel);
+      const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-    function updateSortIndicators(){
-      document.querySelectorAll('thead th .th-ind').forEach(el => el.textContent = '');
-      const ind = $("#ind-"+sortKey);
-      if (ind) ind.textContent = sortDir === 'asc' ? '▲' : '▼';
-    }
+      const rowsEl = document.querySelector('#rows');
+      const emptyEl = document.querySelector('#empty');
+      const missingEl = document.querySelector('#missing');
+      const tableMetaEl = document.querySelector('#tableMeta');
+      const symbolSelect = document.querySelector('#symbolSelect');
+      const toggleClosedBtn = document.querySelector('#toggleClosed');
+      const downloadBtn = document.querySelector('#downloadResults');
+      const chartsCard = document.querySelector('#chartsCard');
+      const symbolSection = document.querySelector('#symbolSection');
+      const symbolTitleEl = document.querySelector('#symbolTitle');
+      const symbolMetricsEl = document.querySelector('#symbolMetrics');
 
-    function cmp(a,b){
-      let av = a?.[sortKey];
-      let bv = b?.[sortKey];
-      const numeric = numericKeys.has(sortKey);
-      const missingA = (av===null || av===undefined || (numeric && isNaN(Number(av))));
-      const missingB = (bv===null || bv===undefined || (numeric && isNaN(Number(bv))));
-      if (missingA && missingB) return 0;
-      if (missingA) return 1; // push missing to bottom
-      if (missingB) return -1;
-      if (numeric){
-        av = Number(av); bv = Number(bv);
-      } else {
-        av = String(av).toUpperCase(); bv = String(bv).toUpperCase();
+      const chipInvested = document.querySelector('#chipInvested');
+      const chipMarketValue = document.querySelector('#chipMarketValue');
+      const chipTotalReturn = document.querySelector('#chipTotalReturn');
+      const chipTotalPercent = document.querySelector('#chipTotalPercent');
+      const chipDividends = document.querySelector('#chipDividends');
+      const chipLifetimeDividends = document.querySelector('#chipLifetimeDividends');
+      const chipLifetimeReturn = document.querySelector('#chipLifetimeReturn');
+      const chipTwr = document.querySelector('#chipTwr');
+      const chipIrr = document.querySelector('#chipIrr');
+      const summaryNotes = document.querySelector('#summaryNotes');
+
+      const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+
+      const fmtCurrency = value => {
+        if (value == null || isNaN(value)) return 'n/a';
+        return currencyFormatter.format(Number(value));
+      };
+      const fmtNumber = (value, digits = 2) => {
+        if (value == null || isNaN(value)) return 'n/a';
+        return Number(value).toFixed(digits);
+      };
+      const fmtPct = (value, digits = 2) => {
+        if (value == null || isNaN(value)) return 'n/a';
+        return Number(value).toFixed(digits) + '%';
+      };
+      const fmtPrice = value => {
+        if (value == null || isNaN(value)) return '<span class="warn">n/a</span>';
+        return '$' + Number(value).toFixed(2);
+      };
+      const sanitizeCsv = value => {
+        if (value == null) return '';
+        const str = String(value);
+        if (str.includes('\"')) return '"' + str.replace(/\"/g, '""') + '"';
+        if (str.includes(',')) return '"' + str + '"';
+        return str;
+      };
+
+      let sortKey = 'symbol';
+      let sortDir = 'asc';
+      let hideClosed = false;
+      let lastRows = [];
+      let overallHistoryData = [];
+      let symbolHistories = {};
+      let symbolCashflows = {};
+      let symbolDividends = {};
+      let lastOverlapGroups = {};
+      let overallPerformanceChart = null;
+      let overallCashflowChart = null;
+      let symbolChart = null;
+      let selectedSymbol = '';
+
+      const numericKeys = new Set([
+        'shares','net_invested_cash','dividends_received','dividend_return_percent',
+        'current_price','market_value','market_gain_dollars','market_gain_percent',
+        'total_return_dollars','total_return_percent','twr_percent','irr_percent'
+      ]);
+
+      function updateSortIndicators(){
+        document.querySelectorAll('.th-ind').forEach(span => {
+          span.textContent = span.dataset.col === sortKey ? (sortDir === 'asc' ? '▲' : '▼') : '';
+        });
       }
-      if (av < bv) return sortDir === 'asc' ? -1 : 1;
-      if (av > bv) return sortDir === 'asc' ? 1 : -1;
-      return 0;
-    }
 
-    function fmtCurrency(v){
-      if (v === null || v === undefined) return "n/a";
-      const sign = v < 0 ? "-" : "";
-      const n = Math.abs(v);
-      return sign + "$" + n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-    }
-    function fmtNumber(v, d=6){
-      if (v === null || v === undefined) return "n/a";
-      return Number(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:d});
-    }
-    function fmtPrice(v){
-      if (v === null || v === undefined) return "n/a";
-      return "$" + Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4});
-    }
-    function fmtPct(v){
-      if (v === null || v === undefined || isNaN(v)) return "n/a";
-      return Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + "%";
-    }
+      function paintSummary(overall = {}){
+        chipInvested.textContent = fmtCurrency(overall.invested || 0);
+        chipMarketValue.textContent = fmtCurrency(overall.market_value || 0);
+        chipTotalReturn.textContent = fmtCurrency(overall.total_return_dollars || 0);
+        chipTotalPercent.textContent = overall.total_return_percent != null ? fmtPct(overall.total_return_percent) : 'n/a';
+        chipDividends.textContent = fmtCurrency(overall.dividends || 0);
+        chipLifetimeDividends.textContent = fmtCurrency(overall.dividends_lifetime ?? overall.dividends ?? 0);
+        chipLifetimeReturn.textContent = fmtCurrency(overall.total_return_dollars_lifetime ?? overall.total_return_dollars ?? 0);
+        chipTwr.textContent = overall.twr_percent != null ? fmtPct(overall.twr_percent, 2) : 'n/a';
+        chipIrr.textContent = overall.irr_percent != null ? fmtPct(overall.irr_percent, 2) : 'n/a';
 
-    async function postFile(url, file) {
-      const fd = new FormData();
-      fd.append("file", file);
-      const r = await fetch(url, { method:"POST", body: fd });
-      if (!r.ok) throw new Error(await r.text());
-      return r.json();
-    }
-
-    $("#uploadActivity").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const files = $("#activityFile").files;
-      const status = $("#statusA");
-      if (!files || files.length === 0) return;
-      status.textContent = "Uploading...";
-      try{
-        for (const f of files) await postFile("/upload", f);
-        status.textContent = "Uploaded";
-        await refresh();
-      }catch(err){
-        status.textContent = "Error: " + err.message;
-      }
-    });
-
-    $("#uploadPositions").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const files = $("#positionsFile").files;
-      const status = $("#statusP");
-      if (!files || files.length === 0) return;
-      status.textContent = "Uploading...";
-      try{
-        for (const f of files) await postFile("/upload_positions", f);
-        status.textContent = "Uploaded";
-        await refresh();
-      }catch(err){
-        status.textContent = "Error: " + err.message;
-      }
-    });
-
-    $("#recalc").addEventListener("click", async () => {
-      await refresh();
-    });
-
-    $("#clear").addEventListener("click", async () => {
-      const btn = $("#clear");
-      btn.disabled = true;
-      try {
-        const r = await fetch("/clear", { method: "POST" });
-        if (!r.ok) throw new Error(await r.text());
-        $("#statusA").textContent = "";
-        $("#statusP").textContent = "";
-        $("#activityFile").value = "";
-        $("#positionsFile").value = "";
-        paintSummary({invested:0,dividends:0,market_value:0,total_return_dollars:0,total_return_percent:null});
-        rowsEl.innerHTML = "";
-        emptyEl.classList.remove("hidden");
-        missingEl.textContent = "";
-        lastRows = [];
-      } catch(err) {
-        missingEl.textContent = "Error: " + err.message;
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    function paintSummary(overall){
-      $("#chipInvested").textContent = fmtCurrency(overall.invested);
-      $("#chipDivs").textContent = fmtCurrency(overall.dividends);
-      $("#chipMarket").textContent = fmtCurrency(overall.market_value);
-      $("#chipTotal").textContent = fmtCurrency(overall.total_return_dollars);
-      $("#chipTotalPct").textContent = overall.total_return_percent==null ? "n/a" : fmtPct(overall.total_return_percent);
-    }
-
-    function paintTable(rows){
-      rowsEl.innerHTML = "";
-      if (!rows || rows.length === 0){
-        emptyEl.classList.remove("hidden");
-        return;
-      }
-      emptyEl.classList.add("hidden");
-      const sorted = rows.slice().sort(cmp);
-      updateSortIndicators();
-      for (const r of sorted){
-        const tr = document.createElement("tr");
-
-        const tdSym = document.createElement("td");
-        tdSym.textContent = r.symbol;
-        tr.appendChild(tdSym);
-
-        const tdShares = document.createElement("td");
-        tdShares.className = "right mono";
-        tdShares.textContent = fmtNumber(r.shares, 6);
-        tr.appendChild(tdShares);
-
-        const tdInv = document.createElement("td");
-        tdInv.className = "right mono";
-        tdInv.textContent = fmtCurrency(r.net_invested_cash);
-        tr.appendChild(tdInv);
-
-        const tdDiv = document.createElement("td");
-        tdDiv.className = "right mono";
-        tdDiv.textContent = fmtCurrency(r.dividends_received);
-        tr.appendChild(tdDiv);
-
-        const tdDivPct = document.createElement("td");
-        tdDivPct.className = "right mono";
-        if (r.dividend_return_percent==null){
-          tdDivPct.innerHTML = '<span class="warn">n/a</span>';
+        let note = '';
+        if (!lastRows.length){
+          note = 'Upload activity and positions CSVs, then click Recalculate.';
         }else{
-          const cls = r.dividend_return_percent >= 0 ? "pos" : "neg";
-          tdDivPct.innerHTML = '<span class="'+cls+'">'+fmtPct(r.dividend_return_percent)+'</span>';
+          const active = lastRows.filter(r => !r.closed).length;
+          const closed = lastRows.filter(r => r.closed).length;
+          const invested = lastRows.reduce((sum, r) => sum + (Number(r.net_invested_cash) || 0), 0);
+          note = `${active} active holdings${closed ? ` � ${closed} closed` : ''} � Net invested ${fmtCurrency(invested)}.`;
+          const overlaps = Object.entries(lastOverlapGroups || {}).filter(([, syms]) => syms.length > 1);
+          if (overlaps.length){
+            const detail = overlaps.map(([tag, syms]) => `${tag}: ${syms.join('/')}`).join(' | ');
+            note += ` � Overlap: ${detail}`;
+          }
         }
-        tr.appendChild(tdDivPct);
-
-        const tdPrice = document.createElement("td");
-        tdPrice.className = "right mono";
-        tdPrice.innerHTML = r.current_price==null ? '<span class="warn">n/a</span>' : fmtPrice(r.current_price);
-        tr.appendChild(tdPrice);
-
-        const tdMV = document.createElement("td");
-        tdMV.className = "right mono";
-        tdMV.textContent = r.market_value==null ? "n/a" : fmtCurrency(r.market_value);
-        tr.appendChild(tdMV);
-
-        const tdMG$ = document.createElement("td");
-        tdMG$.className = "right mono";
-        if (r.market_gain_dollars==null){
-          tdMG$.innerHTML = '<span class="warn">n/a</span>';
-        }else{
-          const cls = r.market_gain_dollars >= 0 ? "pos" : "neg";
-          tdMG$.innerHTML = '<span class="'+cls+'">'+fmtCurrency(r.market_gain_dollars)+'</span>';
-        }
-        tr.appendChild(tdMG$);
-
-        const tdMGp = document.createElement("td");
-        tdMGp.className = "right mono";
-        if (r.market_gain_percent==null){
-          tdMGp.innerHTML = '<span class="warn">n/a</span>';
-        }else{
-          const cls = r.market_gain_percent >= 0 ? "pos" : "neg";
-          tdMGp.innerHTML = '<span class="'+cls+'">'+fmtPct(r.market_gain_percent)+'</span>';
-        }
-        tr.appendChild(tdMGp);
-
-        const tdTR$ = document.createElement("td");
-        tdTR$.className = "right mono";
-        if (r.total_return_dollars==null){
-          tdTR$.innerHTML = '<span class="warn">n/a</span>';
-        }else{
-          const cls = r.total_return_dollars >= 0 ? "pos" : "neg";
-          tdTR$.innerHTML = '<span class="'+cls+'">'+fmtCurrency(r.total_return_dollars)+'</span>';
-        }
-        tr.appendChild(tdTR$);
-
-        const tdTRp = document.createElement("td");
-        tdTRp.className = "right mono";
-        if (r.total_return_percent==null){
-          tdTRp.innerHTML = '<span class="warn">n/a</span>';
-        }else{
-          const cls = r.total_return_percent >= 0 ? "pos" : "neg";
-          tdTRp.innerHTML = '<span class="'+cls+'">'+fmtPct(r.total_return_percent)+'</span>';
-        }
-        tr.appendChild(tdTRp);
-
-        rowsEl.appendChild(tr);
+        summaryNotes.textContent = note;
       }
-    }
 
-    async function refresh(){
-      const btn = $("#recalc");
-      btn.disabled = true;
-      try{
-        const r = await fetch("/portfolio");
-        if (!r.ok){
-          const txt = await r.text();
-          throw new Error(txt || "Server error");
+      function updateTableMeta(rows, shown){
+        if (!rows.length){
+          tableMetaEl.textContent = 'No holdings yet.';
+          return;
         }
-        const data = await r.json();
-        const rows = data.rows || [];
-        lastRows = rows;
-        paintSummary(data.overall || {invested:0,dividends:0,market_value:0,total_return_dollars:0,total_return_percent:null});
-        paintTable(lastRows);
-        const missing = (data.missing_prices || []).filter(Boolean);
-        if (missing.length){
-          missingEl.textContent = "Missing prices: " + missing.join(", ");
-        }else{
-          missingEl.textContent = "";
-        }
-      }catch(err){
-        paintSummary({invested:0,dividends:0,market_value:0,total_return_dollars:0,total_return_percent:null});
-        rowsEl.innerHTML = "";
-        emptyEl.classList.remove("hidden");
-        missingEl.textContent = "Error: " + (err.message || err);
-        lastRows = [];
-      }finally{
-        btn.disabled = false;
+        const closed = rows.filter(r => r.closed).length;
+        const closedMsg = hideClosed && closed ? ` | ${closed} closed hidden` : closed ? ` | ${closed} closed` : '';
+        tableMetaEl.textContent = `${shown} of ${rows.length} holdings shown${closedMsg}`;
       }
-    }
 
-    // Hook up sorting
-    document.querySelectorAll('thead th.sortable').forEach(th => {
-      th.addEventListener('click', () => {
-        const key = th.getAttribute('data-key');
-        if (!key) return;
-        if (sortKey === key){
-          sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-        } else {
-          sortKey = key;
-          sortDir = 'asc';
+      function getComparableValue(row, key){
+        const val = row[key];
+        if (numericKeys.has(key)){
+          return val == null || isNaN(val) ? null : Number(val);
         }
-        // Re-render using cached rows; avoid re-calling server since uploads are cleared after compute
+        if (typeof val === 'string') return val.toUpperCase();
+        return val;
+      }
+
+      function sortRows(rows){
+        const arr = rows.slice();
+        arr.sort((a,b)=>{
+          const av = getComparableValue(a, sortKey);
+          const bv = getComparableValue(b, sortKey);
+          if (av == null && bv == null) return 0;
+          if (av == null) return sortDir === 'asc' ? 1 : -1;
+          if (bv == null) return sortDir === 'asc' ? -1 : 1;
+          if (typeof av === 'string' && typeof bv === 'string'){
+            return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+          }
+          if (av > bv) return sortDir === 'asc' ? 1 : -1;
+          if (av < bv) return sortDir === 'asc' ? -1 : 1;
+          return 0;
+        });
+        return arr;
+      }
+
+      function paintTable(rows){
+        rowsEl.innerHTML = '';
+        if (!rows.length){
+          emptyEl.classList.remove('hidden');
+          updateTableMeta(rows, 0);
+          return;
+        }
+        emptyEl.classList.add('hidden');
+        let working = hideClosed ? rows.filter(r => !r.closed) : rows.slice();
+        working = sortRows(working);
+        updateSortIndicators();
+        updateTableMeta(rows, working.length);
+
+        for (const r of working){
+          const tr = document.createElement('tr');
+          if (r.closed) tr.classList.add('closed-row');
+
+          const tdSym = document.createElement('td');
+          tdSym.textContent = r.symbol || '';
+          if (r.closed){
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = 'closed';
+            tdSym.appendChild(badge);
+          }
+          if (r.roc_flag){
+            const warnBadge = document.createElement('span');
+            warnBadge.className = 'badge warn';
+            warnBadge.textContent = 'ROC?';
+            warnBadge.title = 'Dividends materially exceed invested cash while price is underwater.';
+            tdSym.appendChild(warnBadge);
+          }
+          if (Array.isArray(r.exposure_tags) && r.exposure_tags.length){
+            tdSym.title = `Exposure: ${r.exposure_tags.join(', ')}`;
+          }
+          if (!tdSym.title && r.description){
+            tdSym.title = r.description;
+          }
+          tr.appendChild(tdSym);
+
+          const tdShares = document.createElement('td');
+          tdShares.className = 'right mono';
+          tdShares.textContent = fmtNumber(r.shares ?? 0, 6);
+          tr.appendChild(tdShares);
+
+          const tdInv = document.createElement('td');
+          tdInv.className = 'right mono';
+          tdInv.textContent = fmtCurrency(r.net_invested_cash);
+          tr.appendChild(tdInv);
+
+          const tdDiv = document.createElement('td');
+          tdDiv.className = 'right mono';
+          tdDiv.textContent = fmtCurrency(r.dividends_received);
+          tr.appendChild(tdDiv);
+
+          const tdDivPct = document.createElement('td');
+          tdDivPct.className = 'right mono';
+          tdDivPct.innerHTML = r.dividend_return_percent == null ? '<span class="warn">n/a</span>' : `<span class="${r.dividend_return_percent >= 0 ? 'pos' : 'neg'}">${fmtPct(r.dividend_return_percent)}</span>`;
+          tr.appendChild(tdDivPct);
+
+          const tdPrice = document.createElement('td');
+          tdPrice.className = 'right mono';
+          tdPrice.innerHTML = fmtPrice(r.current_price);
+          tr.appendChild(tdPrice);
+
+          const tdValue = document.createElement('td');
+          tdValue.className = 'right mono';
+          tdValue.textContent = r.market_value == null ? 'n/a' : fmtCurrency(r.market_value);
+          tr.appendChild(tdValue);
+
+          const tdMkt = document.createElement('td');
+          tdMkt.className = 'right mono';
+          tdMkt.innerHTML = r.market_gain_dollars == null ? '<span class="warn">n/a</span>' : `<span class="${r.market_gain_dollars >= 0 ? 'pos' : 'neg'}">${fmtCurrency(r.market_gain_dollars)}</span>`;
+          tr.appendChild(tdMkt);
+
+          const tdMktPct = document.createElement('td');
+          tdMktPct.className = 'right mono';
+          tdMktPct.innerHTML = r.market_gain_percent == null ? '<span class="warn">n/a</span>' : `<span class="${r.market_gain_percent >= 0 ? 'pos' : 'neg'}">${fmtPct(r.market_gain_percent)}</span>`;
+          tr.appendChild(tdMktPct);
+
+          const tdTot = document.createElement('td');
+          tdTot.className = 'right mono';
+          tdTot.innerHTML = r.total_return_dollars == null ? '<span class="warn">n/a</span>' : `<span class="${r.total_return_dollars >= 0 ? 'pos' : 'neg'}">${fmtCurrency(r.total_return_dollars)}</span>`;
+          tr.appendChild(tdTot);
+
+          const tdTotPct = document.createElement('td');
+          tdTotPct.className = 'right mono';
+          tdTotPct.innerHTML = r.total_return_percent == null ? '<span class="warn">n/a</span>' : `<span class="${r.total_return_percent >= 0 ? 'pos' : 'neg'}">${fmtPct(r.total_return_percent)}</span>`;
+          tr.appendChild(tdTotPct);
+
+          const tdTwr = document.createElement('td');
+          tdTwr.className = 'right mono';
+          tdTwr.innerHTML = r.twr_percent == null ? '<span class="warn">n/a</span>' : `<span class="${r.twr_percent >= 0 ? 'pos' : 'neg'}">${fmtPct(r.twr_percent)}</span>`;
+          tr.appendChild(tdTwr);
+
+          const tdIrr = document.createElement('td');
+          tdIrr.className = 'right mono';
+          tdIrr.innerHTML = r.irr_percent == null ? '<span class="warn">n/a</span>' : `<span class="${r.irr_percent >= 0 ? 'pos' : 'neg'}">${fmtPct(r.irr_percent)}</span>`;
+          tr.appendChild(tdIrr);
+
+          tr.addEventListener('click', () => {
+            if (symbolHistories[r.symbol]){
+              symbolSelect.value = r.symbol;
+              selectedSymbol = r.symbol;
+              renderSymbolChart(selectedSymbol);
+            }
+          });
+
+          rowsEl.appendChild(tr);
+        }
+      }
+
+      function buildCumulative(unitNavs){
+        const base = unitNavs.find(v => typeof v === 'number' && v > 0);
+        if (!base) return unitNavs.map(() => null);
+        return unitNavs.map(v => (typeof v === 'number' && v > 0) ? ((v / base) - 1) * 100 : null);
+      }
+
+      function buildDaily(unitNavs){
+        const out = unitNavs.map(() => null);
+        for (let i = 1; i < unitNavs.length; i++){
+          const curr = unitNavs[i];
+          const prev = unitNavs[i-1];
+          if (typeof curr === 'number' && typeof prev === 'number' && prev > 0){
+            out[i] = (curr / prev - 1) * 100;
+          }
+        }
+        return out;
+      }
+
+      function ensureChart(ctx, config, existing){
+        if (existing) existing.destroy();
+        return new Chart(ctx, config);
+      }
+
+      function renderOverallCharts(){
+        if (!overallHistoryData.length){
+          chartsCard.classList.add('hidden');
+          return;
+        }
+        chartsCard.classList.remove('hidden');
+
+        const labels = overallHistoryData.map(p => p.date);
+        const marketValues = overallHistoryData.map(p => p.market_value != null ? Number(p.market_value) : null);
+        const unitNavs = overallHistoryData.map(p => p.unit_nav != null ? Number(p.unit_nav) : null);
+        const contributions = overallHistoryData.map(p => p.contribution != null ? -Number(p.contribution) : 0);
+        const withdrawals = overallHistoryData.map(p => p.withdrawal != null ? Number(p.withdrawal) : 0);
+        const cumulative = buildCumulative(unitNavs);
+        const daily = buildDaily(unitNavs);
+
+        const navCtx = document.getElementById('overallNavChart').getContext('2d');
+        const navConfig = {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                type: 'line',
+                label: 'Market value',
+                data: marketValues,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.12)',
+                borderWidth: 3,
+                pointRadius: 0,
+                pointHoverRadius: 3,
+                yAxisID: 'yValue',
+                spanGaps: true,
+                tension: 0.15
+              },
+              {
+                type: 'line',
+                label: 'Cumulative return %',
+                data: cumulative,
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34,197,94,0.12)',
+                borderWidth: 3,
+                pointRadius: 0,
+                pointHoverRadius: 3,
+                yAxisID: 'yReturn',
+                spanGaps: true,
+                tension: 0.15
+              },
+              {
+                type: 'bar',
+                label: 'Daily return %',
+                data: daily,
+                backgroundColor: 'rgba(251,191,36,0.25)',
+                borderColor: 'rgba(251,191,36,0.4)',
+                borderWidth: 0,
+                yAxisID: 'yReturn',
+                barPercentage: 0.7,
+                hidden: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            layout: { padding: { top: 14, right: 20, bottom: 52, left: 20 } },
+            interaction: { mode: 'index', intersect: false },
+            stacked: false,
+            scales: {
+              yValue: {
+                position: 'left',
+                ticks: { callback: v => fmtCurrency(v), padding: 24 },
+                grid: { color: 'rgba(148,163,184,0.12)' }
+              },
+              yReturn: {
+                position: 'right',
+                ticks: { callback: v => fmtPct(v,1), padding: 18 },
+                grid: { drawOnChartArea: false }
+              },
+              x: {
+                ticks: { autoSkip: true, maxTicksLimit: 10, padding: 18 },
+                grid: { color: 'rgba(148,163,184,0.08)' }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: '#dbeafe' } },
+              tooltip: {
+                callbacks: {
+                  label: ctx => ctx.dataset.yAxisID === 'yValue' ? `${ctx.dataset.label}: ${fmtCurrency(ctx.parsed.y)}` : `${ctx.dataset.label}: ${fmtPct(ctx.parsed.y,2)}`
+                }
+              }
+            }
+          }
+        };
+        overallPerformanceChart = ensureChart(navCtx, navConfig, overallPerformanceChart);
+
+        const cashCtx = document.getElementById('overallCashflowChart').getContext('2d');
+        const cashConfig = {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Contributions',
+                data: contributions,
+                backgroundColor: 'rgba(59,130,246,0.45)',
+                borderWidth: 0,
+                barThickness: 8,
+                maxBarThickness: 12,
+                borderRadius: 3
+              },
+              {
+                label: 'Withdrawals',
+                data: withdrawals,
+                backgroundColor: 'rgba(239,68,68,0.45)',
+                borderWidth: 0,
+                barThickness: 8,
+                maxBarThickness: 12,
+                borderRadius: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            layout: { padding: { top: 12, right: 20, bottom: 44, left: 20 } },
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              y: { ticks: { callback: v => fmtCurrency(v), padding: 24 }, grid: { color: 'rgba(148,163,184,0.1)' } },
+              x: { ticks: { autoSkip: true, maxTicksLimit: 10, padding: 18 }, grid: { color: 'rgba(148,163,184,0.05)' } }
+            },
+            plugins: {
+              legend: { labels: { color: '#dbeafe' } },
+              tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtCurrency(ctx.parsed.y)}` } }
+            }
+          }
+        };
+        overallCashflowChart = ensureChart(cashCtx, cashConfig, overallCashflowChart);
+
+        if (selectedSymbol) renderSymbolChart(selectedSymbol);
+      }
+
+      function renderSymbolChart(symbol){
+        if (!symbol || !(symbolHistories[symbol] || []).length){
+          symbolSection.classList.add('hidden');
+          symbolMetricsEl.textContent = 'Select a holding to inspect its timeline.';
+          return;
+        }
+        selectedSymbol = symbol;
+        const history = symbolHistories[symbol] || [];
+        const labels = history.map(p => p.date);
+        const marketValues = history.map(p => p.market_value != null ? Number(p.market_value) : null);
+        const unitNavs = history.map(p => p.unit_nav != null ? Number(p.unit_nav) : null);
+        const contributions = history.map(p => p.contribution != null ? -Number(p.contribution) : 0);
+        const withdrawals = history.map(p => p.withdrawal != null ? Number(p.withdrawal) : 0);
+        const cumulative = buildCumulative(unitNavs);
+
+        const ctx = document.getElementById('symbolChart').getContext('2d');
+        const config = {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                type: 'line',
+                label: 'Market value',
+                data: marketValues,
+                borderColor: '#38bdf8',
+                backgroundColor: 'rgba(56,189,248,0.12)',
+                borderWidth: 3,
+                pointRadius: 0,
+                pointHoverRadius: 3,
+                yAxisID: 'yValue',
+                spanGaps: true,
+                tension: 0.15
+              },
+              {
+                type: 'line',
+                label: 'Cumulative return %',
+                data: cumulative,
+                borderColor: '#a855f7',
+                backgroundColor: 'rgba(168,85,247,0.12)',
+                borderWidth: 3,
+                pointRadius: 0,
+                pointHoverRadius: 3,
+                yAxisID: 'yReturn',
+                spanGaps: true,
+                tension: 0.15
+              },
+              {
+                type: 'bar',
+                label: 'Contributions',
+                data: contributions,
+                backgroundColor: 'rgba(59,130,246,0.45)',
+                borderWidth: 0,
+                barThickness: 8,
+                maxBarThickness: 12,
+                borderRadius: 3,
+                yAxisID: 'yValue',
+                order: 3
+              },
+              {
+                type: 'bar',
+                label: 'Withdrawals',
+                data: withdrawals,
+                backgroundColor: 'rgba(239,68,68,0.45)',
+                borderWidth: 0,
+                barThickness: 8,
+                maxBarThickness: 12,
+                borderRadius: 3,
+                yAxisID: 'yValue',
+                order: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            layout: { padding: { top: 14, right: 20, bottom: 52, left: 20 } },
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              yValue: { position: 'left', ticks: { callback: v => fmtCurrency(v), padding: 24 }, grid: { color: 'rgba(148,163,184,0.1)' } },
+              yReturn: { position: 'right', ticks: { callback: v => fmtPct(v,1), padding: 18 }, grid: { drawOnChartArea: false } },
+              x: { ticks: { autoSkip: true, maxTicksLimit: 10, padding: 18 }, grid: { color: 'rgba(148,163,184,0.05)' } }
+            },
+            plugins: {
+              legend: { labels: { color: '#dbeafe' } },
+              tooltip: {
+                callbacks: {
+                  label: ctx => ctx.dataset.yAxisID === 'yValue' ? `${ctx.dataset.label}: ${fmtCurrency(ctx.parsed.y)}` : `${ctx.dataset.label}: ${fmtPct(ctx.parsed.y,2)}`
+                }
+              }
+            }
+          }
+        };
+        symbolChart = ensureChart(ctx, config, symbolChart);
+        symbolSection.classList.remove('hidden');
+
+        const row = lastRows.find(r => r.symbol === symbol);
+        if (row){
+          symbolTitleEl.textContent = `${symbol}${row.closed ? ' (closed)' : ''}`;
+          const irr = row.irr_percent != null ? fmtPct(row.irr_percent, 2) : 'n/a';
+          const twr = row.twr_percent != null ? fmtPct(row.twr_percent, 2) : 'n/a';
+          let metricsText = `Shares ${fmtNumber(row.shares ?? 0, 6)} � Invested ${fmtCurrency(row.net_invested_cash)} � Dividends ${fmtCurrency(row.dividends_received)} � TWR ${twr} � IRR ${irr}`;
+          if (row.description){
+            metricsText += ` � ${row.description}`;
+          }
+          symbolMetricsEl.textContent = metricsText;
+        }
+      }
+
+      function updateSymbolSelect(){
+        const previous = selectedSymbol;
+        symbolSelect.innerHTML = '<option value="">Select a holding...</option>';
+        lastRows.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r.symbol;
+          opt.textContent = r.symbol + (r.closed ? ' (closed)' : '');
+          symbolSelect.appendChild(opt);
+        });
+        if (previous && symbolHistories[previous]){
+          symbolSelect.value = previous;
+          selectedSymbol = previous;
+        }else if (lastRows.length && symbolHistories[lastRows[0].symbol]){
+          symbolSelect.value = lastRows[0].symbol;
+          selectedSymbol = lastRows[0].symbol;
+        }else{
+          symbolSelect.value = '';
+          selectedSymbol = '';
+        }
+        renderSymbolChart(selectedSymbol);
+      }
+
+      function downloadResults(){
+        if (!lastRows.length){
+          alert('No results to export yet.');
+          return;
+        }
+        const lines = [];
+        lines.push('Summary');
+        lines.push('symbol,closed,shares,invested,dividends,market_value,total_return_dollars,total_return_percent,twr_percent,irr_percent,roc_flag,exposure_tags,description');
+        lastRows.forEach(r => {
+          const row = [
+            sanitizeCsv(r.symbol),
+            r.closed ? 'yes' : 'no',
+            r.shares ?? '',
+            r.net_invested_cash ?? '',
+            r.dividends_received ?? '',
+            r.market_value ?? '',
+            r.total_return_dollars ?? '',
+            r.total_return_percent ?? '',
+            r.twr_percent ?? '',
+            r.irr_percent ?? '',
+            r.roc_flag ? 'yes' : 'no',
+            (r.exposure_tags || []).join('|'),
+            sanitizeCsv(r.description || '')
+          ];
+          lines.push(row.join(','));
+        });
+        if (overallHistoryData.length){
+          lines.push('');
+          lines.push('Overall History');
+          lines.push('date,market_value,unit_nav,units,cashflow,contribution,withdrawal');
+          overallHistoryData.forEach(p => {
+            const row = [
+              sanitizeCsv(p.date),
+              p.market_value ?? '',
+              p.unit_nav ?? '',
+              p.units ?? '',
+              p.cashflow ?? '',
+              p.contribution ?? '',
+              p.withdrawal ?? ''
+            ];
+            lines.push(row.join(','));
+          });
+        }
+        Object.entries(symbolHistories).forEach(([symbol, history]) => {
+          if (!history.length) return;
+          lines.push('');
+          lines.push(`History - ${symbol}`);
+          lines.push('date,market_value,unit_nav,units,cashflow,contribution,withdrawal,price,shares');
+          history.forEach(p => {
+            const row = [
+              sanitizeCsv(p.date),
+              p.market_value ?? '',
+              p.unit_nav ?? '',
+              p.units ?? '',
+              p.cashflow ?? '',
+              p.contribution ?? '',
+              p.withdrawal ?? '',
+              p.price ?? '',
+              p.shares ?? ''
+            ];
+            lines.push(row.join(','));
+          });
+        });
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'portfolio_results.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 500);
+      }
+
+      async function refresh(){
+        const btn = document.querySelector('#recalc');
+        btn.disabled = true;
+        try{
+          const resp = await fetch('/portfolio');
+          if (!resp.ok){
+            const message = await resp.text();
+            throw new Error(message || 'Server error');
+          }
+          const data = await resp.json();
+          lastRows = data.rows || [];
+          overallHistoryData = (data.history && data.history.series) ? data.history.series : [];
+          symbolHistories = data.symbol_histories || {};
+          symbolCashflows = data.cashflows || {};
+          symbolDividends = data.dividends || {};
+          lastOverlapGroups = data.overlap_groups || {};
+          paintSummary(data.overall || {});
+          paintTable(lastRows);
+          updateSymbolSelect();
+          const missing = (data.missing_prices || []).filter(Boolean);
+          missingEl.textContent = missing.length ? `Missing prices: ${missing.join(', ')}` : '';
+          renderOverallCharts();
+        }catch(err){
+          console.error(err);
+          paintSummary({});
+          paintTable([]);
+          updateSymbolSelect();
+          overallHistoryData = [];
+          lastOverlapGroups = {};
+          renderOverallCharts();
+          missingEl.textContent = `Error: ${err.message || err}`;
+        }finally{
+          btn.disabled = false;
+        }
+      }
+
+      function uploadFiles(formSelector, inputSelector, endpoint, statusSelector){
+        const form = document.querySelector(formSelector);
+        const input = document.querySelector(inputSelector);
+        const status = document.querySelector(statusSelector);
+        form.addEventListener('submit', async ev => {
+          ev.preventDefault();
+          const files = input.files;
+          if (!files.length){
+            status.textContent = 'Choose one or more CSV files.';
+            return;
+          }
+          status.textContent = 'Uploading...';
+          form.querySelector('button').disabled = true;
+          try{
+            for (const file of files){
+              const fd = new FormData();
+              fd.append('file', file);
+              const resp = await fetch(endpoint, { method:'POST', body:fd });
+              if (!resp.ok){
+                const text = await resp.text();
+                throw new Error(text || `Failed to upload ${file.name}`);
+              }
+            }
+            status.textContent = `${files.length} file(s) uploaded and ready.`;
+          }catch(err){
+            status.textContent = `Error: ${err.message}`;
+          }finally{
+            form.querySelector('button').disabled = false;
+          }
+        });
+      }
+
+      async function clearUploads(){
+        const btn = document.querySelector('#clear');
+        btn.disabled = true;
+        try{
+          const resp = await fetch('/clear', { method:'POST' });
+          if (!resp.ok && resp.status !== 404){
+            const text = await resp.text();
+            throw new Error(text || 'Clear failed');
+          }
+          document.querySelector('#activityFile').value = '';
+          document.querySelector('#positionsFile').value = '';
+          document.querySelector('#statusA').textContent = '';
+          document.querySelector('#statusP').textContent = resp.status === 404 ? 'FastAPI backend clears uploads automatically.' : '';
+          paintSummary({});
+          paintTable([]);
+          updateSymbolSelect();
+          overallHistoryData = [];
+          renderOverallCharts();
+          missingEl.textContent = resp.status === 404 ? 'FastAPI clears uploads automatically after each run.' : '';
+        }catch(err){
+          missingEl.textContent = `Error clearing uploads: ${err.message}`;
+        }finally{
+          btn.disabled = false;
+        }
+      }
+
+      uploadFiles('#uploadActivity', '#activityFile', '/upload', '#statusA');
+      uploadFiles('#uploadPositions', '#positionsFile', '/upload_positions', '#statusP');
+
+      document.querySelector('#clear').addEventListener('click', ev => {
+        ev.preventDefault();
+        clearUploads();
+      });
+
+      document.querySelector('#recalc').addEventListener('click', ev => {
+        ev.preventDefault();
+        refresh();
+      });
+
+      symbolSelect.addEventListener('change', ev => {
+        selectedSymbol = ev.target.value;
+        renderSymbolChart(selectedSymbol);
+      });
+
+      downloadBtn.addEventListener('click', ev => {
+        ev.preventDefault();
+        downloadResults();
+      });
+
+      toggleClosedBtn.addEventListener('click', () => {
+        hideClosed = !hideClosed;
+        toggleClosedBtn.textContent = hideClosed ? 'Show closed' : 'Hide closed';
         paintTable(lastRows);
       });
-    });
 
-    // Initial try; harmless if no files yet
-    refresh();
+      document.querySelectorAll('thead th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.dataset.key;
+          if (!key) return;
+          if (sortKey === key){
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+          }else{
+            sortKey = key;
+            sortDir = 'asc';
+          }
+          paintTable(lastRows);
+        });
+      });
+
+      refresh();
+    })();
   </script>
-  <div class="wrap" style="margin-top:8px">
-    <div class="card">
-      <div class="title" style="font-size:16px;margin-bottom:8px">Legend: How calculations work</div>
-      <div class="small muted">
-        <div><strong>Shares</strong>: From positions file (authoritative).</div>
-        <div><strong>Invested</strong>: Cost basis from positions; if missing/0, falls back to net invested from activity (cash out on buys minus proceeds from sells).</div>
-        <div><strong>Dividends</strong>: Sum of positive amounts for “DIVIDEND RECEIVED …” in activity.</div>
-        <div><strong>Dividends %</strong>: dividends ÷ invested × 100 (if invested &gt; 0).</div>
-        <div><strong>Price</strong>: Latest close from Yahoo Finance.</div>
-        <div><strong>Market Value</strong>: current price × shares.</div>
-        <div><strong>Market Gain $</strong>: market value − invested (excludes dividends).</div>
-        <div><strong>Market Gain %</strong>: market gain $ ÷ invested × 100 (if invested &gt; 0).</div>
-        <div><strong>Total Return $</strong>: market value + dividends − invested.</div>
-        <div><strong>Total Return %</strong>: total return $ ÷ invested × 100 (if invested &gt; 0).</div>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
+
+
+
+
+

@@ -1,96 +1,59 @@
-# Fidelity Total Return
+# Fidelity Total Return (Node Edition)
 
-Calculate portfolio total return, including dividends, from Fidelity CSV exports. Two backends are provided (Node.js and Python/FastAPI) that serve a shared minimal frontend.
-
-## What’s Included
-
-- Node.js backend (Express) under `node-app/` (forgiving CSV parsing, recommended for most users)
-- Python backend (FastAPI) under `app/` (simple, minimal deps)
-- Shared frontend at `frontend/index.html`
+This project computes dividend-aware total return from Fidelity CSV exports using a single Node.js backend and a static frontend.
 
 ## Features
 
-- Upload activity and positions CSV files (Fidelity exports)
-- Aggregate transactions and positions into a per-symbol summary
-- Price lookup via Yahoo Finance with ~15 min in‑memory cache
-- Metrics: Market Value, Market Gain $/%, Dividends %, Total Return $/%
-- Sortable table with sticky header and an in‑app legend of formulas
+- Upload Fidelity activity & positions CSVs directly from the browser.
+- Cash-flow aware portfolio model with per-symbol ledgers (invested cash, dividends, TWR, IRR, ROC flags, exposure hints).
+- Unitized daily NAV history powering TWR plus money-weighted IRR.
+- Chart.js visualisations for portfolio NAV, cash flows, and per-symbol performance.
+- Downloadable CSV snapshot including summary and per-symbol history.
+- In-memory price caching via Yahoo Finance (15 minute TTL).
 
 ## Quick Start
 
-Node.js (recommended)
 
-- Windows: run `run.bat`
-- macOS/Linux: run `run.sh`
-- Or manual:
-  - `cd node-app && npm install && npm start`
+up to date, audited 102 packages in 601ms
 
-Python (FastAPI)
+17 packages are looking for funding
+  run `npm fund` for details
 
-- Windows helper: `run_python.bat`
-- Manual:
-  - Create venv and `pip install -r requirements.txt`
-  - Launch: `uvicorn app.main:app --reload --port 8000`
+found 0 vulnerabilities
 
-Open the app at http://127.0.0.1:8000/.
+> fidelity-total-return-node@1.0.0 start
+> node index.js
 
-## CSV Guidance
+The server exposes the UI at .
 
-- Export both “Activity & Orders” and “Positions” from Fidelity.
-- Node path trims preamble lines and is forgiving of variations.
-- Python path expects the header row to be at the top of the CSV.
+### Scripts
 
-## Calculation Rules
+-  /  wrap  for Windows and Unix-like environments.
 
-- Positions are doctrine: only symbols present in the positions file are reported.
-- Shares come from positions; cost basis from positions. If cost basis is missing/0, fall back to activity net invested.
-- Activity parsing is robust to negative signs in Quantity/Amount (uses absolute values for buy/sell math).
-- Dividends are the positive amounts for “DIVIDEND RECEIVED …” in activity.
+## How It Works
 
-Formulas
+1. Upload activity and positions CSVs exported from Fidelity.
+2. The Node backend parses the files, builds per-symbol cash-flow ledgers, and resolves current & historical prices via Yahoo.
+3. The performance engine computes:
+   - **Div %** — dividends / invested cash.
+   - **Mkt $ / Mkt %** — market value minus invested cash (absolute & percent).
+   - **Total $ / Total %** — market value + dividends - invested cash (absolute & percent).
+   - **NAV** — unitized net asset value for chaining returns.
+   - **TWR** — time-weighted return (cash-flow independent).
+   - **IRR** — money-weighted internal rate of return (cash-flow aware).
+   - **ROC?** — badge indicating dividends likely dominated by return-of-capital behaviour.
+4. Results are returned to the frontend for charting and export.
 
-- Market Value = current_price × shares
-- Market Gain $ = market_value − invested (excludes dividends)
-- Market Gain % = Market Gain $ ÷ invested × 100 (if invested > 0)
-- Dividends % = dividends ÷ invested × 100 (if invested > 0)
-- Total Return $ = market_value + dividends − invested
-- Total Return % = Total Return $ ÷ invested × 100 (if invested > 0)
+## File Layout
 
-## API
 
-Common endpoints (both backends)
 
-- `POST /upload` – upload one or more activity CSV files (multipart `file`)
-- `POST /upload_positions` – upload positions CSV files (multipart `file`)
-- `GET /portfolio` – compute and return the enriched portfolio summary
+## Notes
 
-Node‑only convenience
-
-- `POST /clear` – remove uploaded CSVs without computing
-- `GET /recalc` – alias of `/portfolio`
-
-Python notes
-
-- Uploaded CSVs are deleted automatically after `/portfolio` returns.
-
-## Data Handling & Privacy
-
-- Upload directories: `data/uploads` (activity) and `data/positions` (positions)
-- Files are ephemeral and `.gitignore` excludes `data/` and `*.csv`
-- No auth; intended for local use only
-
-## Known Limitations
-
-- Broker CSV variability; Node is more tolerant than Python
-- Tickers without reliable quotes may show n/a; they’re excluded from price‑dependent metrics
-- No persistence beyond the current run; price cache is in‑memory (~15 min)
-
-## Troubleshooting
-
-- “Upload both an activity CSV and a positions CSV first”: ensure both uploads succeeded before Recalculate
-- Python + Clear button: `/clear` exists only on Node; in Python it’s harmless to click but will show an error toast
-- Price rate limits: try again later; caching reduces repeated calls
+- CSV uploads are stored under  and  during processing and removed after each calculation.
+- Charts rely on daily Yahoo closes; missing quotes are forward-filled.
+- The  endpoint wipes uploaded CSVs without recalculating.
 
 ## Support
 
-If this project helps you, consider [supporting it on Ko‑fi](https://ko-fi.com/gille).
+If the tool is helpful, consider supporting it on [Ko-fi](https://ko-fi.com/gille).
